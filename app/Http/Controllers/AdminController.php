@@ -3,21 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Spatie\Browsershot\Browsershot;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Bouncer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
     public function index(Request $request)
     {
-        $admin = User::where('role_id',2)->get();
+        $admin = User::whereIs('admin')->get();
 
-        return view('admin.index')->with('admin',$admin);
+        return view('admin.index')->with('admin', $admin);
     }
 
     public function create()
@@ -29,40 +26,72 @@ class AdminController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'username' => 'required|unique:users,username,NULL,id,deleted_at,NULL',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
         ]);
+
         if ($validator->fails()) {
             return redirect()->back()
-                        ->withErrors($validator);
+                ->withErrors($validator)
+                ->withInput();
         }
-        $request->merge(['password' => Hash::make($request->password),'role_id'=>2]);
 
-        $admin = User::create($request->all());
+        $admin = User::create([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-        return redirect()->route('admin.index')->withSuccess('Data saved');
+        // Assign Bouncer role
+        $admin->assign('admin');
+
+        return redirect()
+            ->route('admin.index')
+            ->withSuccess('Data saved');
     }
 
     public function edit(User $admin)
     {
-        return view('admin.create')->with('admin',$admin);
+        return view('admin.create')->with('admin', $admin);
     }
 
     public function update(Request $request, User $admin)
     {
-        if($request->password !=null){
-            $request->merge(['password' => Hash::make($request->password)]);
-        }else{
-            $request->request->remove('password');
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|unique:users,username,' . $admin->id,
+            'email' => 'required|email|unique:users,email,' . $admin->id,
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
-        // dd($request->all());
-        $admin->update($request->all());
-        return redirect()->route('admin.index')->withSuccess('Data updated');
+
+        $data = [
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+        ];
+
+        if ($request->password != null) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $admin->update($data);
+
+        return redirect()
+            ->route('admin.index')
+            ->withSuccess('Data updated');
     }
 
     public function destroy(User $admin)
     {
         $admin->delete();
 
-        return redirect()->route('admin.index')->withSuccess('Data deleted');
+        return redirect()
+            ->route('admin.index')
+            ->withSuccess('Data deleted');
     }
-
 }

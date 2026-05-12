@@ -11,13 +11,39 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        // 1. Create role if not exists
-        $role = Bouncer::role()->firstOrCreate([
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE ROLES
+        |--------------------------------------------------------------------------
+        */
+
+        $superadminRole = Bouncer::role()->firstOrCreate([
             'name' => 'superadmin',
+            'title' => 'Super Admin',
         ]);
 
-        // 2. Create or get user
-        $user = User::firstOrCreate(
+        $adminRole = Bouncer::role()->firstOrCreate([
+            'name' => 'admin',
+            'title' => 'Admin',
+        ]);
+
+        $customerRole = Bouncer::role()->firstOrCreate([
+            'name' => 'customer',
+            'title' => 'Customer',
+        ]);
+
+        $customerStaffRole = Bouncer::role()->firstOrCreate([
+            'name' => 'customer_staff',
+            'title' => 'Customer Staff',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE SUPERADMIN USER
+        |--------------------------------------------------------------------------
+        */
+
+        $superadmin = User::firstOrCreate(
             ['email' => 'superadmin@gmail.com'],
             [
                 'name' => 'Superadmin',
@@ -26,12 +52,22 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 3. Assign role properly (object, not string)
-        $user->assign($role);
+        /*
+        |--------------------------------------------------------------------------
+        | ASSIGN ROLE
+        |--------------------------------------------------------------------------
+        */
 
-        // 4. Give all abilities to role
+        $superadmin->assign($superadminRole);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GIVE ALL ABILITIES TO SUPERADMIN
+        |--------------------------------------------------------------------------
+        */
+
         $abilities = Bouncer::ability()->all();
 
-        Bouncer::allow($role)->to($abilities);
+        Bouncer::allow($superadminRole)->to($abilities);
     }
 }
