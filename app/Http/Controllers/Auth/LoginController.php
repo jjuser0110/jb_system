@@ -5,69 +5,62 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\User;
-use Socialite;
-use Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
 
     /**
      * Where to redirect users after login.
-     *
-     * @var string
      */
     protected $redirectTo = RouteServiceProvider::HOME;
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
     }
-    
+
+    /**
+     * USE EMAIL for login (IMPORTANT)
+     */
     public function username()
     {
         return 'username';
     }
 
+    /**
+     * After login logic
+     */
     public function authenticated(Request $request, $user)
     {
-        // dd($user);
-        if ($user->is_active != 1) {
-            Auth::logout();
-            
-            return redirect()->route('login')->withErrors('Your account has been locked. Please contact your Boss!');
-        }else{
-            if($user->role_id == 4 || $user->role_id == 3){
-                return redirect()->route('daily_activity.index')->withSuccess('Successfully Login');
-            }else if($user->role_id == 6){
-                return redirect()->route('daily_cleaning.index')->withSuccess('Successfully Login');
-            }else if($user->role_id == 5 || $user->role_id == 7){
+        
+        // ✅ Role-based redirect
+        switch ($user->role_id) {
+
+            case 3:
+            case 4:
+                return redirect()
+                    ->route('home')
+                    ->withSuccess('Successfully Login');
+
+            case 6:
+                return redirect()
+                    ->route('home')
+                    ->withSuccess('Successfully Login');
+
+            case 5:
+            case 7:
                 Auth::logout();
-                
-                return redirect()->route('login')->withErrors('you have no access to this system. Please contact your leader!');
-            }else{
-                return redirect()->route('home')->withSuccess('Successfully Login');
-            }
+                return redirect()->route('login')
+                    ->withErrors('You have no access to this system. Please contact your leader!');
+
+            default:
+                return redirect()
+                    ->route('home')
+                    ->withSuccess('Successfully Login');
         }
     }
 }

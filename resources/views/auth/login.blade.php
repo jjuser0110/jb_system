@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <html
-  lang="ms"
+  lang="en"
   class="light-style layout-wide customizer-hide"
   dir="ltr"
   data-theme="theme-default"
@@ -13,12 +13,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Sistem Senarai Hitam Kereta Sewa</title>
+    <title>JB System</title>
 
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('logosmall.png') }}" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('Shopowner.png') }}" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -72,7 +72,7 @@
               <!-- Logo -->
               <div class="app-brand justify-content-center">
                 <a href="{{route('home')}}" class="app-brand-link gap-2">
-                  <img src="{{ asset('logosmall.png') }}" alt="Logo" style="width:50%; display:block; margin:0 auto;" />
+                  <img src="{{ asset('Shopowner.png') }}" alt="Logo" style="width:50%; display:block; margin:0 auto;" />
                 </a>
               </div>
               <!-- /Logo -->
@@ -81,13 +81,13 @@
                 @csrf
 
                 <div class="mb-3">
-                  <label for="email" class="form-label">Nama Pengguna</label>
-                  <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan nama pengguna anda" autofocus />
+                  <label for="email" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" autofocus />
                 </div>
 
                 <div class="mb-3 form-password-toggle">
                   <div class="d-flex justify-content-between">
-                    <label class="form-label" for="password">Kata Laluan</label>
+                    <label class="form-label" for="password">Password</label>
                   </div>
 
                   <div class="input-group input-group-merge">
@@ -118,7 +118,7 @@
                 @endif
 
                 <div class="mb-3">
-                  <button class="btn btn-primary d-grid w-100" type="submit">Log Masuk</button>
+                  <button class="btn btn-primary d-grid w-100" type="submit">Login</button>
                 </div>
               </form>
 

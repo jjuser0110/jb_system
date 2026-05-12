@@ -12,10 +12,10 @@ $isAgent = $role == 8;
     <div class="app-brand demo">
         <a href="{{ route('home') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <img src="{{ asset('logosmall.png') }}" alt="Logo" style="width:100%;" />
+                <img src="{{ asset('Shopowner.png') }}" alt="Logo" style="width:100%;" />
             </span>
             <span class="app-brand-text demo menu-text fw-bold ms-2" style="font-size:20px;">
-                Senarai Hitam
+                JB System
             </span>
         </a>
 
