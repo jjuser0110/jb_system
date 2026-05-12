@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\User;
+use Socialite;
+use Auth;
+use Illuminate\Support\Str;
+
+class LoginController extends Controller
+{
+    /*
+    |--------------------------------------------------------------------------
+    | Login Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller handles authenticating users for the application and
+    | redirecting them to your home screen. The controller uses a trait
+    | to conveniently provide its functionality to your applications.
+    |
+    */
+
+    use AuthenticatesUsers;
+
+    /**
+     * Where to redirect users after login.
+     *
+     * @var string
+     */
+    protected $redirectTo = RouteServiceProvider::HOME;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('guest')->except('logout');
+    }
+    
+    public function username()
+    {
+        return 'username';
+    }
+
+    public function authenticated(Request $request, $user)
+    {
+        // dd($user);
+        if ($user->is_active != 1) {
+            Auth::logout();
+            
+            return redirect()->route('login')->withErrors('Your account has been locked. Please contact your Boss!');
+        }else{
+            if($user->role_id == 4 || $user->role_id == 3){
+                return redirect()->route('daily_activity.index')->withSuccess('Successfully Login');
+            }else if($user->role_id == 6){
+                return redirect()->route('daily_cleaning.index')->withSuccess('Successfully Login');
+            }else if($user->role_id == 5 || $user->role_id == 7){
+                Auth::logout();
+                
+                return redirect()->route('login')->withErrors('you have no access to this system. Please contact your leader!');
+            }else{
+                return redirect()->route('home')->withSuccess('Successfully Login');
+            }
+        }
+    }
+}
