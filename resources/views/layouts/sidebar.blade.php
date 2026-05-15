@@ -127,7 +127,7 @@ $userModules = [
 
                 {{-- SERVICE --}}
                 <li class="menu-item {{ Str::contains($currentRoute, 'service.') ? 'active' : '' }}">
-                    <a href="{{ route('service.index') }}" class="menu-link">
+                    <a href="{{ route('services.index') }}" class="menu-link">
                         <div>Service</div>
                     </a>
                 </li>
