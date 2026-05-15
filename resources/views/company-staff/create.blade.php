@@ -64,43 +64,54 @@
 
                     </div>
 
-                    {{-- STAFF NAME --}}
+                    {{-- USERNAME --}}
                     <div class="col-md-6 mb-3">
 
-                        <label class="form-label">Staff Name</label>
+                        <label class="form-label">Username</label>
 
                         <input type="text"
-                               name="staff_name"
-                               class="form-control"
-                               value="{{ old('staff_name', $companyStaff->staff_name ?? '') }}">
+                            name="username"
+                            class="form-control"
+                            value="{{ old('username', $companyStaff->user->username ?? '') }}">
 
                     </div>
 
-                    {{-- PHONE --}}
+                    {{-- NAME --}}
                     <div class="col-md-6 mb-3">
 
-                        <label class="form-label">Phone Number</label>
+                        <label class="form-label">Name</label>
 
                         <input type="text"
-                               name="phone_number"
-                               class="form-control"
-                               value="{{ old('phone_number', $companyStaff->phone_number ?? '') }}">
+                            name="name"
+                            class="form-control"
+                            value="{{ old('name', $companyStaff->user->name ?? '') }}">
 
                     </div>
 
-                    {{-- REGISTER DATE --}}
+                    {{-- EMAIL --}}
                     <div class="col-md-6 mb-3">
 
-                        <label class="form-label">Register Date</label>
+                        <label class="form-label">Email</label>
 
-                        <input type="date"
-                               name="registered_date"
-                               class="form-control"
-                               value="{{ old('registered_date', $companyStaff->registered_date ?? '') }}">
+                        <input type="email"
+                            name="email"
+                            class="form-control"
+                            value="{{ old('email', $companyStaff->user->email ?? '') }}">
 
                     </div>
 
-                </div>
+                    {{-- PASSWORD --}}
+                    @if(!isset($companyStaff))
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">Password</label>
+
+                        <input type="password"
+                            name="password"
+                            class="form-control">
+
+                    </div>
+                    @endif
 
                 <hr>
 

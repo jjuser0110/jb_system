@@ -11,9 +11,7 @@ class CompanyStaff extends Model
 
     protected $fillable = [
         'company_id',
-        'staff_name',
-        'phone_number',
-        'registered_date',
+        'user_id',
         'role_id',
     ];
 
@@ -21,5 +19,9 @@ class CompanyStaff extends Model
     {
         return $this->belongsTo(Company::class);
     }
-}
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

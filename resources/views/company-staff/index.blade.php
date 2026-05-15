@@ -41,9 +41,9 @@
 
                     <thead>
                         <tr>
-                            <th>Staff Name</th>
-                            <th>Phone</th>
-                            <th>Register Date</th>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Email</th>
                             <th>Company</th>
                             <th>Actions</th>
                         </tr>
@@ -51,54 +51,54 @@
 
                     <tbody>
 
-                        @forelse($staffs as $staff)
+                    @forelse($staffs as $staff)
 
-                            <tr>
+                        <tr>
 
-                                <td>{{ $staff->staff_name }}</td>
+                            <td>{{ $staff->user->username ?? '-' }}</td>
 
-                                <td>{{ $staff->phone_number ?? '-' }}</td>
+                            <td>{{ $staff->user->name ?? '-' }}</td>
 
-                                <td>{{ $staff->registered_date ?? '-' }}</td>
+                            <td>{{ $staff->user->email ?? '-' }}</td>
 
-                                <td>
-                                    {{ $staff->company->company_name ?? '-' }}
-                                </td>
+                            <td>
+                                {{ $staff->company->company_name ?? '-' }}
+                            </td>
 
-                                <td>
+                            <td>
 
-                                    <a href="{{ route('company-staff.edit', $staff) }}"
-                                       class="btn btn-sm btn-primary">
-                                        Edit
-                                    </a>
+                                <a href="{{ route('company-staff.edit', $staff) }}"
+                                class="btn btn-sm btn-primary">
+                                    Edit
+                                </a>
 
-                                    <form action="{{ route('company-staff.destroy', $staff) }}"
-                                          method="POST"
-                                          style="display:inline-block">
+                                <form action="{{ route('company-staff.destroy', $staff) }}"
+                                    method="POST"
+                                    style="display:inline-block">
 
-                                        @csrf
-                                        @method('DELETE')
+                                    @csrf
+                                    @method('DELETE')
 
-                                        <button class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Delete this staff?')">
-                                            Delete
-                                        </button>
+                                    <button class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Delete this staff?')">
+                                        Delete
+                                    </button>
 
-                                    </form>
+                                </form>
 
-                                </td>
+                            </td>
 
-                            </tr>
+                        </tr>
 
-                        @empty
+                    @empty
 
-                            <tr>
-                                <td colspan="5" class="text-center">
-                                    No staff found
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                No staff found
+                            </td>
+                        </tr>
 
-                        @endforelse
+                    @endforelse
 
                     </tbody>
 
