@@ -1,25 +1,40 @@
 @php
 $currentRoute = request()->route()->getName();
-
 $user = Auth::user();
 
-$canAccessSystem =
-    $user &&
-    (
-        $user->isAn('superadmin') ||
-        $user->isAn('admin') ||
-        $user->isAn('customer_staff')
-    );
+/**
+ * ADMIN = FULL ACCESS
+ * OWNER = Dashboard + Company Module ONLY
+ */
+$isAdmin = $user && (
+    $user->isAn('admin') ||
+    $user->isAn('superadmin')
+);
+$isOwner = $user && $user->isAn('owner');
 
-$canManageUser =
-    $user &&
-    (
-        $user->isAn('superadmin') ||
-        $user->isAn('admin')
-    );
+/**
+ * SYSTEM ACCESS (Dashboard + Company Module)
+ */
+$canAccessSystem = $user && ($isAdmin || $isOwner);
+
+/**
+ * USER MANAGEMENT ACCESS (ADMIN ONLY)
+ */
+$canManageUsers = $isAdmin;
+
+/**
+ * USER MODULE LIST
+ */
+$userModules = [
+    'admin' => 'Admin',
+    'owner' => 'Owner',
+];
 @endphp
 
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
+    {{-- ================= BRAND ================= --}}
     <div class="app-brand demo">
         <a href="{{ route('home') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
@@ -53,27 +68,25 @@ $canManageUser =
         @endif
 
 
-
-        {{-- ================= CUSTOMER ================= --}}
+        {{-- ================= COMPANY MODULE ================= --}}
         @if($canAccessSystem)
-
-        <li class="menu-item {{ Str::contains($currentRoute, 'customer') ? 'active open' : '' }}">
+        <li class="menu-item {{ Str::contains($currentRoute, 'company') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                <div>Customer Module</div>
+                <div>Company Module</div>
             </a>
 
             <ul class="menu-sub">
 
-                <li class="menu-item {{ Str::contains($currentRoute, 'customers') ? 'active' : '' }}">
-                    <a href="{{ route('customers.index') }}" class="menu-link">
-                        <div>Customers</div>
+                <li class="menu-item {{ Str::contains($currentRoute, 'companies') ? 'active' : '' }}">
+                    <a href="{{ route('companies.index') }}" class="menu-link">
+                        <div>Companies</div>
                     </a>
                 </li>
 
-                <li class="menu-item {{ Str::contains($currentRoute, 'customer-staff') ? 'active' : '' }}">
-                    <a href="{{ route('customer-staff.index') }}" class="menu-link">
-                        <div>Customer Staff</div>
+                <li class="menu-item {{ Str::contains($currentRoute, 'company-staff') ? 'active' : '' }}">
+                    <a href="{{ route('company-staff.index') }}" class="menu-link">
+                        <div>Company Staff</div>
                     </a>
                 </li>
 
@@ -82,38 +95,32 @@ $canManageUser =
         @endif
 
 
-        {{-- ================= ADMIN ONLY ================= --}}
-        @if($canManageUser)
+        {{-- ================= USER MANAGEMENT ================= --}}
+        @if($canManageUsers)
 
         <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Settings</span>
+            <span class="menu-header-text">User Management</span>
         </li>
 
         @php
-            $userRoutes3 = ['admin'];
-
-            $isUserActive3 = collect($userRoutes3)
-                ->contains(fn($r) => Str::contains($currentRoute, $r));
+            $isUserMenuActive = collect(array_keys($userModules))
+                ->contains(fn($module) => Str::contains($currentRoute, $module));
         @endphp
 
-        <li class="menu-item {{ $isUserActive3 ? 'active open' : '' }}">
+        <li class="menu-item {{ $isUserMenuActive ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                <i class="menu-icon tf-icons bx bx-user"></i>
                 <div>Users</div>
             </a>
 
             <ul class="menu-sub">
-
-                @foreach ($userRoutes3 as $role3)
-
-                <li class="menu-item {{ Str::contains($currentRoute, $role3) ? 'active' : '' }}">
-                    <a href="{{ route($role3 . '.index') }}" class="menu-link">
-                        <div>{{ ucfirst($role3) }}</div>
-                    </a>
-                </li>
-
+                @foreach($userModules as $route => $label)
+                    <li class="menu-item {{ Str::contains($currentRoute, $route) ? 'active' : '' }}">
+                        <a href="{{ route($route . '.index') }}" class="menu-link">
+                            <div>{{ $label }}</div>
+                        </a>
+                    </li>
                 @endforeach
-
             </ul>
         </li>
 

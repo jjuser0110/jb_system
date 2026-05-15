@@ -11,8 +11,20 @@
             <div class="card">
             <h5 class="card-header">Admin Details</h5>
             <div class="card-body">
-                <form class="row g-3" enctype="multipart/form-data" @if (isset($admin)) method="post" action="{{ route('admin.update',$admin) }}" @else method="post" action="{{ route('admin.store') }}" @endif onsubmit="showLoading()">
+            <form class="row g-3"
+                enctype="multipart/form-data"
+                @if (isset($admin))
+                    method="post" action="{{ route('admin.update',$admin) }}"
+                @else
+                    method="post" action="{{ route('admin.store') }}"
+                @endif
+                onsubmit="showLoading()">
+
                 @csrf
+                @if(isset($admin))
+                    @method('PUT')
+                @endif
+                
                 <div class="col-md-7">
                     <label class="form-label" for="admin_name">Admin Name</label>
                     <input
@@ -36,6 +48,17 @@
                     />
                 </div>
                 <div class="col-md-7">
+                    <label class="form-label" for="admin_email">Email</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Email"
+                        name="email"
+                        value="{{ $admin->email ?? '' }}"
+                        required
+                    />
+                </div>
+                <div class="col-md-7">
                     <label class="form-label" for="password">Password</label>
                     <input
                     type="password"
@@ -44,15 +67,6 @@
                     name="password"
                     @if(!isset($admin)) required @endif />
                 </div>
-                @if(isset($admin))
-                <div class="col-md-7">
-                    <label class="form-label" for="password">Is Active?</label>
-                    <select name="is_active" class="form-control">
-                        <option value="1" <?php echo isset($admin)&&$admin->is_active == 1?'selected':'' ?>>Active</option>
-                        <option value="0" <?php echo isset($admin)&&$admin->is_active == 0?'selected':'' ?>>Inactive</option>
-                    </select>
-                </div>
-                @endif
                 <hr>
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">Submit</button>

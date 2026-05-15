@@ -17,24 +17,26 @@ class UserSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $superadminRole = Bouncer::role()->firstOrCreate([
-            'name' => 'superadmin',
-            'title' => 'Super Admin',
-        ]);
-
         $adminRole = Bouncer::role()->firstOrCreate([
             'name' => 'admin',
             'title' => 'Admin',
         ]);
 
-        $customerRole = Bouncer::role()->firstOrCreate([
-            'name' => 'customer',
-            'title' => 'Customer',
+        $companyRole = Bouncer::role()->firstOrCreate([
+            'name' => 'company',
+        ], [
+            'title' => 'Company',
+        ]);
+        
+        $companyStaffRole = Bouncer::role()->firstOrCreate([
+            'name' => 'company_staff',
+        ], [
+            'title' => 'Company Staff',
         ]);
 
-        $customerStaffRole = Bouncer::role()->firstOrCreate([
-            'name' => 'customer_staff',
-            'title' => 'Customer Staff',
+        $ownerRole = Bouncer::role()->firstOrCreate([
+            'name' => 'owner',
+            'title' => 'Owner',
         ]);
 
         /*
@@ -58,7 +60,7 @@ class UserSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $superadmin->assign($superadminRole);
+        $superadmin->assign($adminRole);
 
         /*
         |--------------------------------------------------------------------------
@@ -68,6 +70,6 @@ class UserSeeder extends Seeder
 
         $abilities = Bouncer::ability()->all();
 
-        Bouncer::allow($superadminRole)->to($abilities);
+        Bouncer::allow($adminRole)->to($abilities);
     }
 }

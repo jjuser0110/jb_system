@@ -1,20 +1,20 @@
 <div class="row">
 
-    {{-- CUSTOMER NAME --}}
+    {{-- COMPANY NAME --}}
     <div class="col-md-6 mb-3">
 
         <label class="form-label">
-            Customer Name
+            Company Name
         </label>
 
         <input
             type="text"
-            name="customer_name"
-            class="form-control @error('customer_name') is-invalid @enderror"
-            value="{{ old('customer_name', $customer->customer_name ?? '') }}"
+            name="company_name"
+            class="form-control @error('company_name') is-invalid @enderror"
+            value="{{ old('company_name', $company->company_name ?? '') }}"
         >
 
-        @error('customer_name')
+        @error('company_name')
             <div class="invalid-feedback">
                 {{ $message }}
             </div>
@@ -34,7 +34,7 @@
             type="date"
             name="register_date"
             class="form-control @error('register_date') is-invalid @enderror"
-            value="{{ old('register_date', $customer->register_date ?? '') }}"
+            value="{{ old('register_date', $company->register_date ?? '') }}"
         >
 
         @error('register_date')
@@ -57,7 +57,7 @@
             type="text"
             name="contact_no"
             class="form-control @error('contact_no') is-invalid @enderror"
-            value="{{ old('contact_no', $customer->contact_no ?? '') }}"
+            value="{{ old('contact_no', $company->contact_no ?? '') }}"
         >
 
         @error('contact_no')

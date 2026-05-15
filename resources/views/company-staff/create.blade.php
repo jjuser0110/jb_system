@@ -5,11 +5,11 @@
 <div class="container-xxl flex-grow-1 container-p-y">
 
     <h4 class="py-3 breadcrumb-wrapper mb-4">
-        <a class="text-muted fw-light" href="{{ route('customer-staff.index') }}">
-            Customer Staff /
+        <a class="text-muted fw-light" href="{{ route('company-staff.index') }}">
+            Company Staff /
         </a>
 
-        @if(isset($customerStaff))
+        @if(isset($companyStaff))
             Edit
         @else
             Create
@@ -25,36 +25,36 @@
         <div class="card-body">
 
             <form method="POST"
-                @if(isset($customerStaff))
-                    action="{{ route('customer-staff.update', $customerStaff) }}"
+                @if(isset($companyStaff))
+                    action="{{ route('company-staff.update', $companyStaff) }}"
                 @else
-                    action="{{ route('customer-staff.store') }}"
+                    action="{{ route('company-staff.store') }}"
                 @endif
             >
 
                 @csrf
 
-                @if(isset($customerStaff))
+                @if(isset($companyStaff))
                     @method('PUT')
                 @endif
 
                 <div class="row">
 
-                    {{-- CUSTOMER --}}
+                    {{-- COMPANY --}}
                     <div class="col-md-6 mb-3">
 
-                        <label class="form-label">Customer</label>
+                        <label class="form-label">Company</label>
 
-                        <select name="customer_id" class="form-control">
+                        <select name="company_id" class="form-control">
 
-                            <option value="">Select Customer</option>
+                            <option value="">Select Company</option>
 
-                            @foreach($customers as $customer)
+                            @foreach($companies as $company)
 
-                                <option value="{{ $customer->id }}"
-                                    {{ old('customer_id', $customerStaff->customer_id ?? '') == $customer->id ? 'selected' : '' }}>
+                                <option value="{{ $company->id }}"
+                                    {{ old('company_id', $companyStaff->company_id ?? '') == $company->id ? 'selected' : '' }}>
 
-                                    {{ $customer->customer_name }}
+                                    {{ $company->company_name }}
 
                                 </option>
 
@@ -72,7 +72,7 @@
                         <input type="text"
                                name="staff_name"
                                class="form-control"
-                               value="{{ old('staff_name', $customerStaff->staff_name ?? '') }}">
+                               value="{{ old('staff_name', $companyStaff->staff_name ?? '') }}">
 
                     </div>
 
@@ -84,7 +84,7 @@
                         <input type="text"
                                name="phone_number"
                                class="form-control"
-                               value="{{ old('phone_number', $customerStaff->phone_number ?? '') }}">
+                               value="{{ old('phone_number', $companyStaff->phone_number ?? '') }}">
 
                     </div>
 
@@ -96,7 +96,7 @@
                         <input type="date"
                                name="registered_date"
                                class="form-control"
-                               value="{{ old('registered_date', $customerStaff->registered_date ?? '') }}">
+                               value="{{ old('registered_date', $companyStaff->registered_date ?? '') }}">
 
                     </div>
 
@@ -106,7 +106,7 @@
 
                 <button class="btn btn-primary">
 
-                    @if(isset($customerStaff))
+                    @if(isset($companyStaff))
                         Update
                     @else
                         Save

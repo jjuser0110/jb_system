@@ -2,29 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
-class AdminController extends Controller
+class OwnerController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * LIST OWNERS
+     */
+    public function index()
     {
-        $admin = User::whereIs('admin')->get();
+        $owners = User::whereIs('owner')->get();
 
-        return view('admin.index')->with('admin', $admin);
+        return view('owner.index', compact('owners'));
     }
 
+    /**
+     * CREATE PAGE
+     */
     public function create()
     {
-        return view('admin.create');
+        return view('owner.create');
     }
 
+    /**
+     * STORE OWNER
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'name' => 'required',
             'username' => 'required|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
@@ -36,7 +45,7 @@ class AdminController extends Controller
                 ->withInput();
         }
 
-        $admin = User::create([
+        $owner = User::create([
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
@@ -44,23 +53,29 @@ class AdminController extends Controller
         ]);
 
         // Assign Bouncer role
-        $admin->assign('admin');
+        $owner->assign('owner');
 
-        return redirect()
-            ->route('admin.index')
-            ->withSuccess('Data saved');
+        return redirect()->route('owner.index')
+            ->withSuccess('Owner created successfully');
     }
 
-    public function edit(User $admin)
+    /**
+     * EDIT PAGE
+     */
+    public function edit(User $owner)
     {
-        return view('admin.create')->with('admin', $admin);
+        return view('owner.create', compact('owner'));
     }
 
-    public function update(Request $request, User $admin)
+    /**
+     * UPDATE OWNER
+     */
+    public function update(Request $request, User $owner)
     {
         $validator = Validator::make($request->all(), [
-            'username' => 'required|unique:users,username,' . $admin->id,
-            'email' => 'required|email|unique:users,email,' . $admin->id,
+            'name' => 'required',
+            'username' => 'required|unique:users,username,' . $owner->id,
+            'email' => 'required|email|unique:users,email,' . $owner->id,
         ]);
 
         if ($validator->fails()) {
@@ -75,23 +90,24 @@ class AdminController extends Controller
             'email' => $request->email,
         ];
 
-        if ($request->password != null) {
+        if ($request->password) {
             $data['password'] = Hash::make($request->password);
         }
 
-        $admin->update($data);
+        $owner->update($data);
 
-        return redirect()
-            ->route('admin.index')
-            ->withSuccess('Data updated');
+        return redirect()->route('owner.index')
+            ->withSuccess('Owner updated successfully');
     }
 
-    public function destroy(User $admin)
+    /**
+     * DELETE OWNER
+     */
+    public function destroy(User $owner)
     {
-        $admin->delete();
+        $owner->delete();
 
-        return redirect()
-            ->route('admin.index')
-            ->withSuccess('Data deleted');
+        return redirect()->route('owner.index')
+            ->withSuccess('Owner deleted successfully');
     }
 }

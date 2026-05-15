@@ -5,20 +5,20 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="py-3 breadcrumb-wrapper mb-4">
-        <span class="text-muted fw-light">Admin </span>
+        <span class="text-muted fw-light">Owner </span>
     </h4>
 
     <!-- DataTable with Buttons -->
     <div class="card">
         <div class="card-header flex-column flex-md-row">
             <div class="head-label">
-                <h5 class="card-title mb-0">Admin Listing</h5>
+                <h5 class="card-title mb-0">Owner Listing</h5>
             </div>
 
             <div class="dt-action-buttons text-end pt-3 pt-md-0">
                 <div class="dt-buttons">
                     <a class="dt-button create-new btn btn-primary"
-                       href="{{ route('admin.create') }}"
+                       href="{{ route('owner.create') }}"
                        onclick="showLoading()">
                         <span>
                             <i class="bx bx-plus me-sm-1"></i>
@@ -42,7 +42,7 @@
                 </thead>
 
                 <tbody>
-                    @foreach($admin as $index => $row)
+                    @foreach($owners as $index => $row)
                         <tr>
                             <td>{{ $index + 1 }}</td>
 
@@ -55,14 +55,14 @@
                             </td>
 
                             <td>
-                                <a href="{{ route('admin.edit', $row) }}"
+                                <a href="{{ route('owner.edit', $row) }}"
                                    onclick="showLoading()"
                                    class="me-2">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
 
                                 <a style="color:red;cursor:pointer"
-                                   onclick="if(confirm('Are you sure you want to delete?')){showLoading();window.location.href='{{ route('admin.destroy',$row) }}'}">
+                                   onclick="if(confirm('Are you sure you want to delete?')){showLoading();window.location.href='{{ route('owner.destroy',$row) }}'}">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>

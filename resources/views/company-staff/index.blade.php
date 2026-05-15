@@ -5,7 +5,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
 
     <h4 class="py-3 breadcrumb-wrapper mb-4">
-        <span class="text-muted fw-light">Customer Staff</span>
+        <span class="text-muted fw-light">Company Staff</span>
     </h4>
 
     <div class="card">
@@ -14,12 +14,12 @@
         <div class="card-header flex-column flex-md-row">
 
             <div class="head-label">
-                <h5 class="card-title mb-0">Customer Staff Listing</h5>
+                <h5 class="card-title mb-0">Company Staff Listing</h5>
             </div>
 
             <div class="dt-action-buttons text-end pt-3 pt-md-0">
 
-                <a href="{{ route('customer-staff.create') }}"
+                <a href="{{ route('company-staff.create') }}"
                    class="btn btn-primary"
                    onclick="showLoading()">
 
@@ -44,7 +44,7 @@
                             <th>Staff Name</th>
                             <th>Phone</th>
                             <th>Register Date</th>
-                            <th>Customer</th>
+                            <th>Company</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -62,17 +62,17 @@
                                 <td>{{ $staff->registered_date ?? '-' }}</td>
 
                                 <td>
-                                    {{ $staff->customer->customer_name ?? '-' }}
+                                    {{ $staff->company->company_name ?? '-' }}
                                 </td>
 
                                 <td>
 
-                                    <a href="{{ route('customer-staff.edit', $staff) }}"
+                                    <a href="{{ route('company-staff.edit', $staff) }}"
                                        class="btn btn-sm btn-primary">
                                         Edit
                                     </a>
 
-                                    <form action="{{ route('customer-staff.destroy', $staff) }}"
+                                    <form action="{{ route('company-staff.destroy', $staff) }}"
                                           method="POST"
                                           style="display:inline-block">
 

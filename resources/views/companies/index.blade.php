@@ -6,7 +6,7 @@
 
     <h4 class="py-3 breadcrumb-wrapper mb-4">
         <span class="text-muted fw-light">
-            Customers
+            companies
         </span>
     </h4>
 
@@ -16,7 +16,7 @@
 
             <div class="head-label">
                 <h5 class="card-title mb-0">
-                    Customer Listing
+                    Company Listing
                 </h5>
             </div>
 
@@ -26,13 +26,13 @@
 
                     <a
                         class="dt-button create-new btn btn-primary"
-                        href="{{ route('customers.create') }}"
+                        href="{{ route('companies.create') }}"
                     >
                         <span>
                             <i class="bx bx-plus me-sm-1"></i>
 
                             <span class="d-none d-sm-inline-block">
-                                Add New Customer
+                                Add New Company
                             </span>
                         </span>
                     </a>
@@ -102,7 +102,7 @@
                     name="search"
                     value="{{ request('search') }}"
                     class="form-control form-control-sm"
-                    placeholder="Search customer..."
+                    placeholder="Search company..."
                 >
 
                 <input
@@ -128,7 +128,7 @@
                         <tr>
 
                             <th>
-                                Customer Name
+                                Company Name
                             </th>
 
                             <th>
@@ -153,26 +153,26 @@
 
                     <tbody>
 
-                        @forelse($customers as $customer)
+                        @forelse($companies as $company)
 
                         <tr>
 
                             <td>
-                                <a href="{{ route('customers.edit', $customer) }}">
-                                    {{ $customer->customer_name }}
+                                <a href="{{ route('companies.edit', $company) }}">
+                                    {{ $company->company_name }}
                                 </a>
                             </td>
 
                             <td>
-                                {{ $customer->register_date ?? '-' }}
+                                {{ $company->register_date ?? '-' }}
                             </td>
 
                             <td>
-                                {{ $customer->contact_no ?? '-' }}
+                                {{ $company->contact_no ?? '-' }}
                             </td>
 
                             <td>
-                                {{ $customer->role->name ?? '-' }}
+                                {{ $company->role->name ?? '-' }}
                             </td>
 
                             <td>
@@ -193,7 +193,7 @@
 
                                             <a
                                                 class="dropdown-item"
-                                                href="{{ route('customers.edit', $customer) }}"
+                                                href="{{ route('companies.edit', $company) }}"
                                             >
                                                 Edit
                                             </a>
@@ -205,14 +205,14 @@
                                             <a
                                                 class="dropdown-item text-danger"
                                                 href="#"
-                                                onclick="confirmDelete({{ $customer->id }})"
+                                                onclick="confirmDelete({{ $company->id }})"
                                             >
                                                 Delete
                                             </a>
 
                                             <form
-                                                id="delete-form-{{ $customer->id }}"
-                                                action="{{ route('customers.destroy', $customer) }}"
+                                                id="delete-form-{{ $company->id }}"
+                                                action="{{ route('companies.destroy', $company->id) }}"
                                                 method="POST"
                                                 style="display:none;"
                                             >
@@ -257,19 +257,19 @@
                 <div>
 
                     Showing
-                    {{ $customers->firstItem() ?? 0 }}
+                    {{ $companies->firstItem() ?? 0 }}
                     to
-                    {{ $customers->lastItem() ?? 0 }}
+                    {{ $companies->lastItem() ?? 0 }}
 
                     of
 
-                    {{ $customers->total() }}
+                    {{ $companies->total() }}
                     entries
 
                 </div>
 
                 <div>
-                    {{ $customers->withQueryString()->links() }}
+                    {{ $companies->withQueryString()->links() }}
                 </div>
 
             </div>

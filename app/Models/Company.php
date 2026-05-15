@@ -6,15 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Customer extends Model
+class Company extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'customer_name',
+        'company_name',
         'register_date',
         'contact_no',
         'role_id',
+        'user_id',
     ];
     
         public function role()
@@ -24,6 +25,6 @@ class Customer extends Model
 
     public function staffs()
     {
-        return $this->hasMany(CustomerStaff::class);
+        return $this->hasMany(CompanyStaff::class);
     }
 }

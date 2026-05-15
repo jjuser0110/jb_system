@@ -5,21 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CustomerStaff extends Model
+class CompanyStaff extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'customer_id',
+        'company_id',
         'staff_name',
         'phone_number',
         'registered_date',
         'role_id',
     ];
 
-    public function customer()
+    public function company()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Company::class);
     }
 }
 
