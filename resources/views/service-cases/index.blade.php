@@ -51,171 +51,115 @@
 
             <table class="dt-column-search table table-bordered"
                 id="mytable">
-
                 <thead>
-
                     <tr>
-
                         <th>No</th>
-
                         <th>Company</th>
-
                         <th>Company Staff</th>
-
                         <th>Service</th>
-
                         <th>Photo</th>
-
                         <th>Status</th>
-
                         <th>Duration</th>
-
                         <th>Submitted</th>
-
                         <th>Completed</th>
-
-                        <th>Handled By</th>
-
+                        <th>Price</th>
+                        <th>Payment</th>
                         <th>Actions</th>
-
                     </tr>
-
                 </thead>
-
                 <tbody>
-
                     @foreach($serviceCases as $index => $row)
-
                         @php
-
                             $days = now()->diffInDays($row->submit_datetime);
-
                             if($days <= 2){
-
                                 $durationColor = 'success';
-
                             }elseif($days <= 4){
-
                                 $durationColor = 'warning';
-
                             }else{
-
                                 $durationColor = 'danger';
-
                             }
-
                         @endphp
-
                         <tr>
-
                             {{-- NO --}}
                             <td>
                                 {{ $index + 1 }}
                             </td>
-
                             {{-- COMPANY --}}
                             <td>
                                 {{ $row->companyStaff->company->company_name ?? '-' }}
                             </td>
-
                             {{-- COMPANY STAFF --}}
                             <td>
                                 {{ $row->companyStaff->user->name ?? '-' }}
                             </td>
-
                             {{-- SERVICE --}}
                             <td>
                                 {{ $row->service->name ?? '-' }}
                             </td>
-
                             {{-- PHOTO --}}
                             <td>
-
                                 @if($row->photo)
-
                                     <img src="{{ asset('storage/' . $row->photo) }}"
                                         width="80"
                                         class="img-thumbnail">
-
                                 @else
-
                                     -
-
                                 @endif
-
-                            </td>
-
+                            </td> 
                             {{-- STATUS --}}
                             <td>
-
                                 @if($row->status == 'pending')
-
                                     <span class="badge bg-warning">
                                         Pending
                                     </span>
-
                                 @elseif($row->status == 'complete')
-
                                     <span class="badge bg-success">
                                         Complete
                                     </span>
-
                                 @elseif($row->status == 'reject')
-
                                     <span class="badge bg-danger">
                                         Reject
                                     </span>
-
                                 @elseif($row->status == 'cancel')
-
                                     <span class="badge bg-secondary">
                                         Cancel
                                     </span>
-
                                 @endif
-
                             </td>
-
                             {{-- DURATION --}}
                             <td>
-
                                 <span class="badge bg-{{ $durationColor }}">
-
                                     {{ $days }} Day(s)
-
                                 </span>
-
                             </td>
-
                             {{-- SUBMIT DATETIME --}}
                             <td>
-
                                 {{ \Carbon\Carbon::parse($row->submit_datetime)->format('d/m/Y h:i A') }}
-
                             </td>
-
                             {{-- COMPLETE DATETIME --}}
                             <td>
-
                                 @if($row->completed_at)
-
                                     {{ \Carbon\Carbon::parse($row->completed_at)->format('d/m/Y h:i A') }}
-
                                 @else
-
                                     -
-
                                 @endif
-
                             </td>
-
-                            {{-- STAFF --}}
                             <td>
-
-                                {{ $row->staff->name ?? '-' }}
-
+                                RM {{ number_format($row->price, 2) }}
                             </td>
-
+                            <td>
+                                <a href="{{ route('service-cases.toggle-payment', $row) }}">
+                                    @if($row->is_paid)
+                                        <span class="badge bg-success">
+                                            PAID
+                                        </span>
+                                    @else
+                                        <span class="badge bg-danger">
+                                            UNPAID
+                                        </span>
+                                    @endif
+                                </a>
+                            </td>
                             {{-- ACTION --}}
                             <td>
 

@@ -11,5 +11,11 @@ Route::prefix('service-cases')->as('service-cases.')->group(function () {
     Route::get('/edit/{serviceCase}', [ServiceCaseController::class, 'edit'])->name('edit');
     Route::put('/update/{serviceCase}', [ServiceCaseController::class, 'update'])->name('update');
     Route::delete('/destroy/{serviceCase}', [ServiceCaseController::class, 'destroy'])->name('destroy');
+    Route::get('/pending', [ServiceCaseController::class, 'pending'])->name('pending');
+    Route::get('/accepted', [ServiceCaseController::class, 'accepted'])->name('accepted');
+    Route::get('/completed', [ServiceCaseController::class, 'completed'])->name('completed');
+    Route::get('/accept/{serviceCase}', [ServiceCaseController::class, 'accept'])->name('accept');
+    Route::post('/complete/{serviceCase}', [ServiceCaseController::class, 'complete'])->name('complete');
+    Route::get('/toggle-payment/{serviceCase}', [ServiceCaseController::class, 'togglePayment'])->name('toggle-payment');
 
 });

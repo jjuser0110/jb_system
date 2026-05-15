@@ -317,4 +317,104 @@ class ServiceCaseController extends Controller
             ->route('service-cases.index')
             ->with('success', 'Case deleted successfully');
     }
+
+    private function adminOnly()
+    {
+        $user = auth()->user();
+
+        abort_unless(
+            $user->isAn('admin') ||
+            $user->isAn('owner') ||
+            $user->isAn('superadmin'),
+            403
+        );
+    }
+
+    public function pending()
+    {
+        $this->adminOnly();
+
+        $serviceCases = ServiceCase::with([
+            'service',
+            'companyStaff.user',
+            'companyStaff.company',
+        ])
+        ->where('status', 'pending')
+        ->latest()
+        ->get();
+
+        return view('service-cases.pending', compact('serviceCases'));
+    }
+
+    public function accepted()
+    {
+        $this->adminOnly();
+    
+        $serviceCases = ServiceCase::with([
+            'service',
+            'companyStaff.user',
+            'companyStaff.company',
+        ])
+        ->where('status', 'accepted')
+        ->latest()
+        ->get();
+    
+        return view('service-cases.accepted', compact('serviceCases'));
+    }
+
+    public function completed()
+    {
+        $this->adminOnly();
+
+        $serviceCases = ServiceCase::with([
+            'service',
+            'companyStaff.user',
+            'companyStaff.company',
+        ])
+        ->where('status', 'complete')
+        ->latest()
+        ->get();
+
+        return view('service-cases.completed', compact('serviceCases'));
+    }
+
+    public function accept(ServiceCase $serviceCase)
+    {
+        $this->adminOnly();
+
+        $serviceCase->update([
+            'status' => 'accepted',
+            'accepted_at' => now(),
+        ]);
+
+        return back()->with('success', 'Case accepted');
+    }
+
+    public function complete(Request $request, ServiceCase $serviceCase)
+    {
+        $this->adminOnly();
+
+        $request->validate([
+            'price' => 'required|numeric|min:0'
+        ]);
+
+        $serviceCase->update([
+            'status' => 'complete',
+            'price' => $request->price,
+            'completed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Case completed');
+    }
+
+    public function togglePayment(ServiceCase $serviceCase)
+    {
+        $this->adminOnly();
+
+        $serviceCase->update([
+            'is_paid' => !$serviceCase->is_paid
+        ]);
+
+        return back();
+    }
 }
