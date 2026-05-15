@@ -3,22 +3,34 @@ $currentRoute = request()->route()->getName();
 $user = Auth::user();
 
 /**
- * ADMIN = FULL ACCESS
- * OWNER = Dashboard + Company Module ONLY
+ * ROLES
  */
 $isAdmin = $user && (
     $user->isAn('admin') ||
     $user->isAn('superadmin')
 );
+
 $isOwner = $user && $user->isAn('owner');
 
-/**
- * SYSTEM ACCESS (Dashboard + Company Module)
- */
-$canAccessSystem = $user && ($isAdmin || $isOwner);
+$isStaff = $user && $user->isAn('company_staff');
 
 /**
- * USER MANAGEMENT ACCESS (ADMIN ONLY)
+ * DASHBOARD → ALL USERS
+ */
+$canAccessDashboard = $user && ($isAdmin || $isOwner || $isStaff);
+
+/**
+ * COMPANY MODULE → ADMIN + OWNER ONLY
+ */
+$canAccessCompanyModule = $user && ($isAdmin || $isOwner);
+
+/**
+ * CASE MODULE → ALL USERS
+ */
+$canAccessCaseModule = $user && ($isAdmin || $isOwner || $isStaff);
+
+/**
+ * USER MANAGEMENT → ADMIN ONLY
  */
 $canManageUsers = $isAdmin;
 
@@ -58,7 +70,7 @@ $userModules = [
     <ul class="menu-inner py-1">
 
         {{-- ================= DASHBOARD ================= --}}
-        @if($canAccessSystem)
+        @if($canAccessDashboard)
         <li class="menu-item {{ Str::contains($currentRoute, 'home') ? 'active' : '' }}">
             <a href="{{ route('home') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -69,7 +81,7 @@ $userModules = [
 
 
         {{-- ================= COMPANY MODULE ================= --}}
-        @if($canAccessSystem)
+        @if($canAccessCompanyModule)
         <li class="menu-item {{ Str::contains($currentRoute, 'company') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user-circle"></i>
@@ -95,7 +107,37 @@ $userModules = [
         @endif
 
 
-        {{-- ================= USER MANAGEMENT ================= --}}
+        {{-- ================= CASE MODULE (ALL ROLES) ================= --}}
+        @if($canAccessCaseModule)
+        <li class="menu-item {{ Str::contains($currentRoute, 'service-cases') || Str::contains($currentRoute, 'service.') ? 'active open' : '' }}">
+
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Case Module</div>
+            </a>
+
+            <ul class="menu-sub">
+
+                {{-- CASE --}}
+                <li class="menu-item {{ Str::contains($currentRoute, 'service-cases.') ? 'active' : '' }}">
+                    <a href="{{ route('service-cases.index') }}" class="menu-link">
+                        <div>Case</div>
+                    </a>
+                </li>
+
+                {{-- SERVICE --}}
+                <li class="menu-item {{ Str::contains($currentRoute, 'service.') ? 'active' : '' }}">
+                    <a href="{{ route('service.index') }}" class="menu-link">
+                        <div>Service</div>
+                    </a>
+                </li>
+
+            </ul>
+        </li>
+        @endif
+
+
+        {{-- ================= USER MANAGEMENT (ADMIN ONLY) ================= --}}
         @if($canManageUsers)
 
         <li class="menu-header small text-uppercase">

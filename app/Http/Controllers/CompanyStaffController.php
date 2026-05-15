@@ -99,26 +99,39 @@ class CompanyStaffController extends Controller
         }
     
         DB::transaction(function () use ($request) {
-    
+
             $user = User::create([
                 'username' => $request->username,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
-    
-            Bouncer::assign('company-staff')->to($user);
-    
+        
+            // IMPORTANT: assign role in Bouncer
+            Bouncer::assign('company_staff')->to($user);
+        
             CompanyStaff::create([
                 'company_id' => $request->company_id,
                 'user_id' => $user->id,
-                'role_id' => 4,
             ]);
         });
-    
+        
         return redirect()
             ->route('company-staff.index')
             ->with('success', 'Staff created successfully');
+    }
+    public function assignStaff(Request $request)
+    {
+        $user = User::find($request->user_id);
+
+        CompanyStaff::create([
+            'company_id' => $request->company_id,
+            'user_id' => $user->id,
+        ]);
+
+        Bouncer::assign('company_staff')->to($user);
+
+        return back();
     }
     /**
      * EDIT FORM
