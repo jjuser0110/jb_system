@@ -25,31 +25,91 @@
             @endif
 
             <div class="row">
-
                 {{-- COMPANY --}}
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Company</label>
 
-                    <div class="form-control bg-light">
-                        {{ $companies->first()->company_name ?? '' }}
-                    </div>
-                </div>
-
-                {{-- STAFF (AUTO LOGIN) --}}
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Company Staff</label>
+                    <label class="form-label">
+                        Company
+                    </label>
 
                     @php
-                        $user = auth()->user();
+                        $isAdmin =
+                            auth()->user()->isAn('admin') ||
+                            auth()->user()->isAn('owner') ||
+                            auth()->user()->isAn('superadmin');
                     @endphp
 
-                    <input type="hidden"
-                        name="company_staff_id"
-                        value="{{ $serviceCase->company_staff_id ?? ($user->companyStaff->id ?? '') }}">
+                    @if($isAdmin)
 
-                    <div class="form-control bg-light">
-                        {{ $user->name }}
-                    </div>
+                        <select name="company_id" class="form-control">
+
+                            @foreach($companies as $company)
+
+                                <option value="{{ $company->id }}"
+                                    {{ isset($serviceCase) && $serviceCase->companyStaff->company_id == $company->id ? 'selected' : '' }}>
+
+                                    {{ $company->company_name }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    @else
+
+                        <input type="hidden"
+                            name="company_id"
+                            value="{{ $companies->first()->id ?? '' }}">
+
+                        <div class="form-control bg-light">
+                            {{ $companies->first()->company_name ?? '' }}
+                        </div>
+
+                    @endif
+
+                </div>
+                {{-- COMPANY STAFF --}}
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Company Staff
+                    </label>
+
+                    @if($isAdmin)
+
+                        <select name="company_staff_id" class="form-control">
+
+                            @foreach($companyStaffs as $staff)
+
+                                <option value="{{ $staff->id }}"
+                                    {{ isset($serviceCase) && $serviceCase->company_staff_id == $staff->id ? 'selected' : '' }}>
+
+                                    {{ $staff->user->name }}
+                                    ({{ $staff->company->company_name ?? '-' }})
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    @else
+
+                        @php
+                            $user = auth()->user();
+                        @endphp
+
+                        <input type="hidden"
+                            name="company_staff_id"
+                            value="{{ $companyStaffs->first()->id ?? '' }}">
+
+                        <div class="form-control bg-light">
+                            {{ $user->name }}
+                        </div>
+
+                    @endif
+
                 </div>
 
                 {{-- DATETIME --}}
