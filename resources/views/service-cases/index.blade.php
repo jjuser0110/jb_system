@@ -48,7 +48,6 @@
 
         {{-- TABLE --}}
         <div class="card-datatable text-nowrap table-responsive">
-        <div class="table-responsive">
 
             <table class="dt-column-search table table-bordered"
                 id="mytable">
@@ -190,7 +189,6 @@
                 </tbody>
 
             </table>
-        </div>
 
         </div>
 
@@ -210,14 +208,10 @@
 $(function () {
 
     $('#mytable').DataTable({
-
         responsive: false,
         scrollX: true,
-
         pageLength: 10,
-
         lengthMenu: [10, 25, 50, 75, 100],
-
     });
 
 });
