@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ServiceCase;
+use Illuminate\Support\Facades\Storage;
 
 class AdminServiceCaseController extends Controller
 {
@@ -86,7 +87,7 @@ class AdminServiceCaseController extends Controller
     /**
      * UPDATE PAYMENT
      */
-    public function updatePayment($id)
+    public function updatePayment(Request $request, $id)
     {
         if (
             !auth()->user()->isAn('admin') &&
@@ -97,13 +98,31 @@ class AdminServiceCaseController extends Controller
 
         $serviceCase = ServiceCase::findOrFail($id);
 
-        $serviceCase->is_paid = !$serviceCase->is_paid;
+        // VALIDATION
+        $request->validate([
+            'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        // DELETE OLD RECEIPT
+        if ($serviceCase->receipt) {
+
+            Storage::disk('public')->delete($serviceCase->receipt);
+        }
+
+        // UPLOAD RECEIPT
+        $receiptPath = $request
+            ->file('receipt')
+            ->store('receipts', 'public');
+
+        // UPDATE
+        $serviceCase->is_paid = true;
+        $serviceCase->receipt = $receiptPath;
 
         $serviceCase->save();
 
         return back()->with(
             'success',
-            'Payment status updated.'
+            'Payment updated successfully.'
         );
     }
 }

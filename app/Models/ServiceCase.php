@@ -14,6 +14,7 @@ class ServiceCase extends Model
         'status',
         'completed_at',
         'is_paid',
+        'receipt',
         'price',
         'accepted_at',
     ];

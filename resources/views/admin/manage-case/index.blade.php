@@ -227,22 +227,55 @@
                                 </form>
 
                             @endif
-
                             {{-- PAYMENT --}}
                             @if($case->status == 'complete')
 
-                                <form method="POST"
-                                    action="{{ route('admin.manage-case.payment', $case->id) }}">
+                                {{-- ALREADY PAID --}}
+                                @if($case->is_paid)
 
-                                    @csrf
+                                    <div class="mb-2">
 
-                                    <button class="btn btn-dark btn-sm w-100">
+                                        <span class="badge bg-success w-100">
+                                            PAID
+                                        </span>
 
-                                        {{ $case->is_paid ? 'Mark Unpaid' : 'Mark Paid' }}
+                                    </div>
 
-                                    </button>
+                                    @if($case->receipt)
 
-                                </form>
+                                        <a href="{{ asset('storage/' . $case->receipt) }}"
+                                        target="_blank"
+                                        class="btn btn-primary btn-sm w-100">
+
+                                            View Receipt
+
+                                        </a>
+
+                                    @endif
+
+                                @else
+
+                                    {{-- MARK PAID --}}
+                                    <form method="POST"
+                                        action="{{ route('admin.manage-case.payment', $case->id) }}"
+                                        enctype="multipart/form-data">
+
+                                        @csrf
+
+                                        <input type="file"
+                                            name="receipt"
+                                            class="form-control mb-2"
+                                            required>
+
+                                        <button class="btn btn-dark btn-sm w-100">
+
+                                            Mark Paid
+
+                                        </button>
+
+                                    </form>
+
+                                @endif
 
                             @endif
 
