@@ -13,6 +13,9 @@ class ServiceCase extends Model
         'photo',
         'status',
         'completed_at',
+        'is_paid',
+        'price',
+        'accepted_at',
     ];
 
     protected $casts = [

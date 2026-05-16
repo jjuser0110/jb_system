@@ -105,7 +105,13 @@ $userModules = [
                     </a>
                 </li>
                 @endcan
-
+                @can('manage-case')
+                <li class="menu-item {{ Str::contains($currentRoute, 'admin-manage-case.') ? 'active' : '' }}">
+                    <a href="{{ route('admin.manage-case.index') }}" class="menu-link">
+                        <div>Manage Case</div>
+                    </a>
+                </li>
+                @endcan
                 @can('manage-service')
                 <li class="menu-item {{ Str::contains($currentRoute, 'service.') ? 'active' : '' }}">
                     <a href="{{ route('services.index') }}" class="menu-link">
@@ -117,7 +123,6 @@ $userModules = [
             </ul>
         </li>
         @endif
-
 
         {{-- ================= USER MANAGEMENT ================= --}}
         @if($canManageUsers)
