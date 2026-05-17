@@ -10,6 +10,7 @@ use App\Models\DailyCleaning;
 use App\Models\Extra;
 use App\Models\Expense;
 use App\Models\DcWorkerSalary;
+use App\Models\ServiceCase;
 use Bouncer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -30,10 +31,41 @@ class HomeController extends Controller
     }
 
 
-    public function index(Request $request)
+    public function index()
     {
-        
-        return view('home');
+        $totalCases = ServiceCase::count();
+
+        $pendingCases = ServiceCase::where('status', 'pending')->count();
+
+        $inProgressCases = ServiceCase::where('status', 'inprogress')->count();
+
+        $completedCases = ServiceCase::where('status', 'completed')->count();
+
+        $paidCases = ServiceCase::where('is_paid', 1)->count();
+
+        $unpaidCases = ServiceCase::where('is_paid', 0)->count();
+
+        $totalRevenue = ServiceCase::where('is_paid', 1)
+            ->sum('price');
+
+        $recentCases = ServiceCase::with([
+                'service',
+                'companyStaff'
+            ])
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return view('home', compact(
+            'totalCases',
+            'pendingCases',
+            'inProgressCases',
+            'completedCases',
+            'paidCases',
+            'unpaidCases',
+            'totalRevenue',
+            'recentCases'
+        ));
     }
 
     public function change_password(Request $request){

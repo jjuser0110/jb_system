@@ -112,18 +112,20 @@ $userModules = [
                     </a>
                 </li>
                 @endcan
-                @can('manage-service')
-                <li class="menu-item {{ Str::contains($currentRoute, 'service.') ? 'active' : '' }}">
-                    <a href="{{ route('services.index') }}" class="menu-link">
-                        <div>Service</div>
-                    </a>
-                </li>
-                @endcan
 
             </ul>
         </li>
         @endif
 
+        {{-- ================= SERVICE MODULE ================= --}}
+        @can('manage-service')
+        <li class="menu-item {{ Str::contains($currentRoute, 'service') ? 'active' : '' }}">
+            <a href="{{ route('services.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Service</div>
+            </a>
+        </li>
+        @endcan
         {{-- ================= USER MANAGEMENT ================= --}}
         @if($canManageUsers)
 
