@@ -45,7 +45,138 @@
             </div>
 
         </div>
+        {{-- FILTER --}}
+<div class="card-body border-bottom">
 
+    <form method="GET">
+
+        <div class="row g-3 align-items-end">
+
+            {{-- DATE FROM --}}
+            <div class="col-md-2">
+                <label class="form-label">
+                    Date From
+                </label>
+
+                <input type="date"
+                    name="date_from"
+                    class="form-control"
+                    value="{{ $dateFrom }}">
+            </div>
+
+            {{-- DATE TO --}}
+            <div class="col-md-2">
+                <label class="form-label">
+                    Date To
+                </label>
+
+                <input type="date"
+                    name="date_to"
+                    class="form-control"
+                    value="{{ $dateTo }}">
+            </div>
+            {{-- COMPANY --}}
+            <div class="col-md-3">
+
+                <label class="form-label">
+                    Company
+                </label>
+
+                <select name="company_id"
+                    class="form-select">
+
+                    <option value="">
+                        All Company
+                    </option>
+
+                    @foreach($companies as $company)
+
+                        <option value="{{ $company->id }}"
+                            {{ request('company_id') == $company->id ? 'selected' : '' }}>
+
+                            {{ $company->company_name }}
+
+                        </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
+            {{-- SEARCH BUTTON --}}
+            <div class="col-md-3">
+
+                <button class="btn btn-primary">
+                    Filter
+                </button>
+
+                <a href="{{ route('service-cases.index') }}"
+                    class="btn btn-secondary">
+                    Reset
+                </a>
+
+            </div>
+            <div class="col-md-2">
+                <a href="{{ route('service-cases.export', request()->all()) }}"
+                    class="btn btn-success">
+                    Export Excel
+                </a>
+            </div>
+        </div>
+
+        {{-- STATUS BUTTONS --}}
+        <div class="mt-4 d-flex flex-wrap gap-2">
+
+                    <a href="{{ route('service-cases.index') }}"
+                        class="btn btn-dark">
+                        All
+                    </a>
+
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'pending',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                    ]) }}"
+                        class="btn btn-warning">
+
+                        Pending
+                    </a>
+
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'in_progress',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                    ]) }}"
+                        class="btn btn-info">
+
+                        In Progress
+                    </a>
+
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'cancel',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                    ]) }}"
+                        class="btn btn-danger">
+
+                        Cancel
+                    </a>
+
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'complete',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                    ]) }}"
+                        class="btn btn-success">
+
+                        Complete
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
         {{-- TABLE --}}
         <div class="card-datatable text-nowrap table-responsive">
 

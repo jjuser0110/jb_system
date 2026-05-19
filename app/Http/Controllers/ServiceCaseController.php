@@ -7,15 +7,26 @@ use App\Models\ServiceCase;
 use App\Models\Company;
 use App\Models\CompanyStaff;
 use Illuminate\Http\Request;
+use App\Exports\ServiceCaseExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ServiceCaseController extends Controller
 {
     /**
      * LISTING
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
+    
+        /**
+         * DEFAULT CURRENT MONTH
+         */
+        $dateFrom = $request->date_from
+            ?? now()->startOfMonth()->format('Y-m-d');
+    
+        $dateTo = $request->date_to
+            ?? now()->endOfMonth()->format('Y-m-d');
     
         $query = ServiceCase::with([
             'service',
@@ -24,37 +35,69 @@ class ServiceCaseController extends Controller
             'staff'
         ]);
     
-        // ADMIN / OWNER = SEE ALL
+        /**
+         * COMPANY STAFF ONLY SEE OWN COMPANY
+         */
         if (
-            $user->isAn('admin') ||
-            $user->isAn('owner') ||
-            $user->isAn('superadmin')
+            !$user->isAn('admin') &&
+            !$user->isAn('owner') &&
+            !$user->isAn('superadmin')
         ) {
     
-            $serviceCases = $query
-                ->latest()
-                ->get();
-    
-        } else {
-    
-            // COMPANY STAFF = ONLY OWN COMPANY
             $companyStaff = CompanyStaff::where('user_id', $user->id)->first();
     
             if (!$companyStaff) {
                 abort(403);
             }
     
-            $serviceCases = $query
-                ->whereHas('companyStaff', function ($q) use ($companyStaff) {
-                    $q->where('company_id', $companyStaff->company_id);
-                })
-                ->latest()
-                ->get();
+            $query->whereHas('companyStaff', function ($q) use ($companyStaff) {
+                $q->where('company_id', $companyStaff->company_id);
+            });
+    
+            $companies = Company::where(
+                'id',
+                $companyStaff->company_id
+            )->get();
+    
+        } else {
+    
+            $companies = Company::orderBy('company_name')->get();
         }
     
-        return view('service-cases.index', compact('serviceCases'));
+        /**
+         * COMPANY FILTER
+         */
+        if ($request->company_id) {
+    
+            $query->whereHas('companyStaff', function ($q) use ($request) {
+                $q->where('company_id', $request->company_id);
+            });
+        }
+    
+        /**
+         * STATUS FILTER
+         */
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+    
+        /**
+         * DATE FILTER
+         */
+        $query->whereDate('submit_datetime', '>=', $dateFrom)
+            ->whereDate('submit_datetime', '<=', $dateTo);
+    
+        $serviceCases = $query
+            ->latest()
+            ->get();
+    
+        return view('service-cases.index', compact(
+            'serviceCases',
+            'companies',
+            'dateFrom',
+            'dateTo'
+        ));
     }
-
     /**
      * CREATE FORM
      */
@@ -416,5 +459,47 @@ class ServiceCaseController extends Controller
         ]);
 
         return back();
+    }
+    public function export(Request $request)
+    {
+        $query = ServiceCase::with([
+            'service',
+            'companyStaff.user',
+            'companyStaff.company',
+        ]);
+
+        if ($request->company_id) {
+
+            $query->whereHas('companyStaff', function ($q) use ($request) {
+                $q->where('company_id', $request->company_id);
+            });
+        }
+
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->date_from) {
+            $query->whereDate(
+                'submit_datetime',
+                '>=',
+                $request->date_from
+            );
+        }
+
+        if ($request->date_to) {
+            $query->whereDate(
+                'submit_datetime',
+                '<=',
+                $request->date_to
+            );
+        }
+
+        $serviceCases = $query->latest()->get();
+
+        return Excel::download(
+            new ServiceCaseExport($serviceCases),
+            'service-cases.xlsx'
+        );
     }
 }
