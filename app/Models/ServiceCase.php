@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class ServiceCase extends Model
+class ServiceCase extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $fillable = [
         'company_staff_id',
         'submit_datetime',
-        'service_id',
-        'photo',
+        'description',
         'status',
         'completed_at',
         'is_paid',
@@ -24,25 +27,21 @@ class ServiceCase extends Model
         'completed_at' => 'datetime',
     ];
 
-    // COMPANY
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
 
-    // COMPANY STAFF
     public function companyStaff()
     {
         return $this->belongsTo(CompanyStaff::class);
     }
 
-    // STAFF
     public function staff()
     {
         return $this->belongsTo(User::class, 'staff_id');
     }
 
-    // DURATION COLOR
     public function getDurationColorAttribute()
     {
         if (!$this->submit_datetime) {
@@ -52,17 +51,13 @@ class ServiceCase extends Model
         $days = now()->diffInDays($this->submit_datetime);
 
         if ($days <= 2) {
-            return 'success'; // green
+            return 'success';
         }
 
         if ($days <= 4) {
-            return 'warning'; // orange
+            return 'warning';
         }
 
-        return 'danger'; // red
-    }
-    public function service()
-    {
-        return $this->belongsTo(Service::class);
+        return 'danger';
     }
 }

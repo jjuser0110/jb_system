@@ -45,91 +45,109 @@
             </div>
 
         </div>
+
         {{-- FILTER --}}
-<div class="card-body border-bottom">
+        <div class="card-body border-bottom">
 
-    <form method="GET">
+            <form method="GET">
 
-        <div class="row g-3 align-items-end">
+                <div class="row g-3 align-items-end">
 
-            {{-- DATE FROM --}}
-            <div class="col-md-2">
-                <label class="form-label">
-                    Date From
-                </label>
+                    {{-- DATE FROM --}}
+                    <div class="col-md-2">
 
-                <input type="date"
-                    name="date_from"
-                    class="form-control"
-                    value="{{ $dateFrom }}">
-            </div>
+                        <label class="form-label">
+                            Date From
+                        </label>
 
-            {{-- DATE TO --}}
-            <div class="col-md-2">
-                <label class="form-label">
-                    Date To
-                </label>
+                        <input type="date"
+                            name="date_from"
+                            class="form-control"
+                            value="{{ $dateFrom }}">
 
-                <input type="date"
-                    name="date_to"
-                    class="form-control"
-                    value="{{ $dateTo }}">
-            </div>
-            {{-- COMPANY --}}
-            <div class="col-md-3">
+                    </div>
 
-                <label class="form-label">
-                    Company
-                </label>
+                    {{-- DATE TO --}}
+                    <div class="col-md-2">
 
-                <select name="company_id"
-                    class="form-select">
+                        <label class="form-label">
+                            Date To
+                        </label>
 
-                    <option value="">
-                        All Company
-                    </option>
+                        <input type="date"
+                            name="date_to"
+                            class="form-control"
+                            value="{{ $dateTo }}">
 
-                    @foreach($companies as $company)
+                    </div>
 
-                        <option value="{{ $company->id }}"
-                            {{ request('company_id') == $company->id ? 'selected' : '' }}>
+                    {{-- COMPANY --}}
+                    <div class="col-md-3">
 
-                            {{ $company->company_name }}
+                        <label class="form-label">
+                            Company
+                        </label>
 
-                        </option>
+                        <select name="company_id"
+                            class="form-select">
 
-                    @endforeach
+                            <option value="">
+                                All Company
+                            </option>
 
-                </select>
+                            @foreach($companies as $company)
 
-            </div>
-            {{-- SEARCH BUTTON --}}
-            <div class="col-md-3">
+                                <option value="{{ $company->id }}"
+                                    {{ request('company_id') == $company->id ? 'selected' : '' }}>
 
-                <button class="btn btn-primary">
-                    Filter
-                </button>
+                                    {{ $company->company_name }}
 
-                <a href="{{ route('service-cases.index') }}"
-                    class="btn btn-secondary">
-                    Reset
-                </a>
+                                </option>
 
-            </div>
-            <div class="col-md-2">
-                <a href="{{ route('service-cases.export', request()->all()) }}"
-                    class="btn btn-success">
-                    Export Excel
-                </a>
-            </div>
-        </div>
+                            @endforeach
 
-        {{-- STATUS BUTTONS --}}
-        <div class="mt-4 d-flex flex-wrap gap-2">
+                        </select>
+
+                    </div>
+
+                    {{-- BUTTON --}}
+                    <div class="col-md-3">
+
+                        <button class="btn btn-primary">
+                            Filter
+                        </button>
+
+                        <a href="{{ route('service-cases.index') }}"
+                            class="btn btn-secondary">
+
+                            Reset
+
+                        </a>
+
+                    </div>
+
+                    {{-- EXPORT --}}
+                    <div class="col-md-2">
+
+                        <a href="{{ route('service-cases.export', request()->all()) }}"
+                            class="btn btn-success">
+
+                            Export Excel
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                {{-- STATUS BUTTONS --}}
+                <div class="mt-4 d-flex flex-wrap gap-2">
 
                     <a href="{{ route('service-cases.index') }}"
                         class="btn btn-dark">
+
                         All
+
                     </a>
 
                     <a href="{{ route('service-cases.index', [
@@ -140,16 +158,18 @@
                         class="btn btn-warning">
 
                         Pending
+
                     </a>
 
                     <a href="{{ route('service-cases.index', [
-                        'status' => 'in_progress',
+                        'status' => 'accepted',
                         'date_from' => request('date_from'),
                         'date_to' => request('date_to'),
                     ]) }}"
                         class="btn btn-info">
 
-                        In Progress
+                        Accepted
+
                     </a>
 
                     <a href="{{ route('service-cases.index', [
@@ -160,6 +180,7 @@
                         class="btn btn-danger">
 
                         Cancel
+
                     </a>
 
                     <a href="{{ route('service-cases.index', [
@@ -170,6 +191,7 @@
                         class="btn btn-success">
 
                         Complete
+
                     </a>
 
                 </div>
@@ -177,18 +199,21 @@
             </form>
 
         </div>
+
         {{-- TABLE --}}
         <div class="card-datatable text-nowrap table-responsive">
 
             <table class="dt-column-search table table-bordered"
                 id="mytable">
+
                 <thead>
+
                     <tr>
+
                         <th>No</th>
                         <th>Company</th>
-                        <th>Company Staff</th>
-                        <th>Service</th>
-                        <th>Photo</th>
+                        <th>Staff</th>
+                        <th>Description</th>
                         <th>Status</th>
                         <th>Duration</th>
                         <th>Submitted</th>
@@ -196,101 +221,158 @@
                         <th>Price</th>
                         <th>Payment</th>
                         <th>Actions</th>
+
                     </tr>
+
                 </thead>
+
                 <tbody>
+
                     @foreach($serviceCases as $index => $row)
+
                         @php
-                            $days = now()->diffInDays($row->submit_datetime);
+
+                            $days = now()->diffInDays(
+                                $row->submit_datetime
+                            );
+
                             if($days <= 2){
+
                                 $durationColor = 'success';
+
                             }elseif($days <= 4){
+
                                 $durationColor = 'warning';
+
                             }else{
+
                                 $durationColor = 'danger';
                             }
+
                         @endphp
+
                         <tr>
+
                             {{-- NO --}}
                             <td>
                                 {{ $index + 1 }}
                             </td>
+
                             {{-- COMPANY --}}
                             <td>
                                 {{ $row->companyStaff->company->company_name ?? '-' }}
                             </td>
-                            {{-- COMPANY STAFF --}}
+
+                            {{-- STAFF --}}
                             <td>
                                 {{ $row->companyStaff->user->name ?? '-' }}
                             </td>
-                            {{-- SERVICE --}}
-                            <td>
-                                {{ $row->service->name ?? '-' }}
+
+                            {{-- DESCRIPTION --}}
+                            <td style="min-width:250px; white-space:normal;">
+
+                                {{ $row->description ?? '-' }}
+
                             </td>
-                            {{-- PHOTO --}}
-                            <td>
-                                @if($row->photo)
-                                    <img src="{{ asset('storage/' . $row->photo) }}"
-                                        width="80"
-                                        class="img-thumbnail">
-                                @else
-                                    -
-                                @endif
-                            </td> 
+
                             {{-- STATUS --}}
                             <td>
+
                                 @if($row->status == 'pending')
+
                                     <span class="badge bg-warning">
                                         Pending
                                     </span>
+
+                                @elseif($row->status == 'accepted')
+
+                                    <span class="badge bg-info">
+                                        Accepted
+                                    </span>
+
                                 @elseif($row->status == 'complete')
+
                                     <span class="badge bg-success">
                                         Complete
                                     </span>
+
                                 @elseif($row->status == 'reject')
+
                                     <span class="badge bg-danger">
                                         Reject
                                     </span>
+
                                 @elseif($row->status == 'cancel')
+
                                     <span class="badge bg-secondary">
                                         Cancel
                                     </span>
+
                                 @endif
+
                             </td>
+
                             {{-- DURATION --}}
                             <td>
+
                                 <span class="badge bg-{{ $durationColor }}">
+
                                     {{ $days }} Day(s)
+
                                 </span>
+
                             </td>
+
                             {{-- SUBMIT DATETIME --}}
                             <td>
+
                                 {{ \Carbon\Carbon::parse($row->submit_datetime)->format('d/m/Y h:i A') }}
+
                             </td>
+
                             {{-- COMPLETE DATETIME --}}
                             <td>
+
                                 @if($row->completed_at)
+
                                     {{ \Carbon\Carbon::parse($row->completed_at)->format('d/m/Y h:i A') }}
+
                                 @else
                                     -
                                 @endif
+
                             </td>
+
+                            {{-- PRICE --}}
                             <td>
+
                                 RM {{ number_format($row->price, 2) }}
+
                             </td>
+
+                            {{-- PAYMENT --}}
                             <td>
+
                                 <a href="{{ route('service-cases.toggle-payment', $row) }}">
+
                                     @if($row->is_paid)
+
                                         <span class="badge bg-success">
                                             PAID
                                         </span>
+
                                     @else
+
                                         <span class="badge bg-danger">
                                             UNPAID
                                         </span>
+
                                     @endif
+
                                 </a>
+
                             </td>
+
                             {{-- ACTION --}}
                             <td>
 

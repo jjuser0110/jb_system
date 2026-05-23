@@ -119,50 +119,59 @@
                     <input type="datetime-local"
                     name="submit_datetime"
                     class="form-control"
-                    value="{{ old('submit_datetime', now()->format('Y-m-d\TH:i')) }}">
+                    value="{{ old(
+                                'submit_datetime',
+                                isset($serviceCase)
+                                    ? \Carbon\Carbon::parse($serviceCase->submit_datetime)->format('Y-m-d\TH:i')
+                                    : now()->format('Y-m-d\TH:i')
+                            ) }}">
                 </div>
 
-                {{-- SERVICE --}}
+                {{-- DESCRIPTION --}}
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Service</label>
 
-                    <select name="service_id" class="form-control mb-2">
-                        <option value="">Select Existing Service</option>
+                    <label class="form-label">
+                        Description
+                    </label>
 
-                        @foreach($services as $service)
-                            <option value="{{ $service->id }}"
-                                {{ isset($serviceCase) && $serviceCase->service_id == $service->id ? 'selected' : '' }}>
-                                {{ $service->name }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <div class="text-center my-2">
-                        <small>OR</small>
-                    </div>
-
-                    <input type="text"
-                        name="new_service_name"
+                    <textarea
+                        name="description"
                         class="form-control"
-                        placeholder="Type new service if not listed">
+                        rows="4"
+                        required>{{ old('description', $serviceCase->description ?? '') }}</textarea>
+
                 </div>
 
                 {{-- PHOTO --}}
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Upload Photo</label>
 
-                    <input type="file"
+                    <label class="form-label">
+                        Upload Photo
+                    </label>
+
+                    <input
+                        type="file"
                         name="photo"
                         accept="image/*"
                         capture="environment"
                         class="form-control">
 
-                    @if(isset($serviceCase) && $serviceCase->photo)
-                        <div class="mt-2">
-                            <img src="{{ asset('storage/' . $serviceCase->photo) }}"
-                                style="width:120px; border-radius:8px;">
+                    @if(isset($serviceCase) && $serviceCase->getFirstMediaUrl('photos'))
+
+                        <div class="mt-3">
+
+                            <img
+                                src="{{ $serviceCase->getFirstMediaUrl('photos') }}"
+                                style="
+                                    width:120px;
+                                    border-radius:8px;
+                                    object-fit:cover;
+                                ">
+
                         </div>
+
                     @endif
+
                 </div>
 
             </div>
