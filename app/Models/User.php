@@ -18,6 +18,7 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
+        'company_id',
     ];
 
     protected $hidden = [
@@ -28,4 +29,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function companies()
+    {
+        return $this->hasMany(Company::class);
+    }
 }

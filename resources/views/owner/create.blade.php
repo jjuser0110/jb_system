@@ -64,6 +64,32 @@
                                    value="{{ $owner->email ?? '' }}"
                                    required />
                         </div>
+                        <div class="mb-3">
+                            <label>Companies</label>
+
+                            <select name="company_ids[]" class="form-control" multiple>
+
+                                @foreach($companies as $company)
+
+                                    <option value="{{ $company->id }}"
+                                        {{ in_array(
+                                            $company->id,
+                                            old(
+                                                'company_ids',
+                                                isset($owner)
+                                                    ? $owner->companies->pluck('id')->toArray()
+                                                    : []
+                                            )
+                                        ) ? 'selected' : '' }}>
+
+                                        {{ $company->company_name }}
+
+                                    </option>
+
+                                @endforeach
+
+                            </select>
+                        </div>
 
                         {{-- PASSWORD --}}
                         <div class="col-md-7">

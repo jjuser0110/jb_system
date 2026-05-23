@@ -49,7 +49,6 @@ class CompanyController extends Controller
             'register_date' => $request->register_date,
             'contact_no' => $request->contact_no,
             'role_id' => 3,
-            'user_id' => Auth::id(), 
         ]);
 
         return redirect()

@@ -117,11 +117,9 @@
                     <label class="form-label">Submit Datetime</label>
 
                     <input type="datetime-local"
-                        name="submit_datetime"
-                        class="form-control"
-                        value="{{ isset($serviceCase)
-                            ? \Carbon\Carbon::parse($serviceCase->submit_datetime)->format('Y-m-d\TH:i')
-                            : '' }}">
+                    name="submit_datetime"
+                    class="form-control"
+                    value="{{ old('submit_datetime', now()->format('Y-m-d\TH:i')) }}">
                 </div>
 
                 {{-- SERVICE --}}

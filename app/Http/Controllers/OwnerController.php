@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Company;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,7 +25,10 @@ class OwnerController extends Controller
      */
     public function create()
     {
-        return view('owner.create');
+        $companies = Company::whereNull('user_id')->get();
+
+         return view('owner.create', compact('companies'));
+
     }
 
     /**
@@ -37,36 +41,48 @@ class OwnerController extends Controller
             'username' => 'required|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
+            'company_ids' => 'nullable|array',
+            'company_ids.*' => 'exists:companies,id',
         ]);
-
+    
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-
+    
         $owner = User::create([
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
-        // Assign Bouncer role
+    
         $owner->assign('owner');
-
+    
+        // Assign selected companies to owner
+        if ($request->company_ids) {
+    
+            Company::whereIn('id', $request->company_ids)
+                ->update([
+                    'user_id' => $owner->id
+                ]);
+        }
+    
         return redirect()->route('owner.index')
             ->withSuccess('Owner created successfully');
     }
-
     /**
      * EDIT PAGE
      */
     public function edit(User $owner)
     {
-        return view('owner.create', compact('owner'));
+        $companies = Company::whereNull('user_id')
+            ->orWhere('user_id', $owner->id)
+            ->get();
+    
+        return view('owner.create', compact('owner', 'companies'));
     }
-
     /**
      * UPDATE OWNER
      */
@@ -76,26 +92,43 @@ class OwnerController extends Controller
             'name' => 'required',
             'username' => 'required|unique:users,username,' . $owner->id,
             'email' => 'required|email|unique:users,email,' . $owner->id,
+            'company_ids' => 'nullable|array',
+            'company_ids.*' => 'exists:companies,id',
         ]);
-
+    
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-
+    
         $data = [
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
         ];
-
+    
         if ($request->password) {
             $data['password'] = Hash::make($request->password);
         }
-
+    
         $owner->update($data);
-
+    
+        // Remove all previous companies
+        Company::where('user_id', $owner->id)
+            ->update([
+                'user_id' => null
+            ]);
+    
+        // Assign selected companies
+        if ($request->company_ids) {
+    
+            Company::whereIn('id', $request->company_ids)
+                ->update([
+                    'user_id' => $owner->id
+                ]);
+        }
+    
         return redirect()->route('owner.index')
             ->withSuccess('Owner updated successfully');
     }
