@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CompanyStaff;
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 use Bouncer;
 
 class CompanyStaffController extends Controller
@@ -16,20 +14,22 @@ class CompanyStaffController extends Controller
     /**
      * LIST STAFF
      */
-    public function index(Request $request)
+    public function index()
     {
         if (
             auth()->user()->isAn('admin') ||
             auth()->user()->isAn('superadmin')
         ) {
 
-            $staffs = CompanyStaff::with('company', 'user')
+            $staffs = User::with('company')
+                ->whereIs('company_staff')
                 ->latest()
                 ->paginate(10);
 
         } else {
 
-            $staffs = CompanyStaff::with('company', 'user')
+            $staffs = User::with('company')
+                ->whereIs('company_staff')
                 ->whereHas('company', function ($q) {
                     $q->where('user_id', auth()->id());
                 })
@@ -41,7 +41,7 @@ class CompanyStaffController extends Controller
     }
 
     /**
-     * SHOW CREATE FORM
+     * CREATE FORM
      */
     public function create()
     {
@@ -67,83 +67,73 @@ class CompanyStaffController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
-            'username' => 'required|unique:users,username',
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
+            'username'   => 'required|unique:users,username',
+            'name'       => 'required',
+            'email'      => 'required|email|unique:users,email',
+            'password'   => 'required|min:6',
         ]);
-    
+
         if ($validator->fails()) {
-    
+
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-    
+
         /**
-         * OWNER CAN ONLY CREATE STAFF
-         * FOR OWN COMPANY
+         * OWNER ONLY CAN CREATE
+         * STAFF FOR OWN COMPANY
          */
         if (
             !auth()->user()->isAn('admin') &&
             !auth()->user()->isAn('superadmin')
         ) {
-    
+
             $company = Company::where('id', $request->company_id)
                 ->where('user_id', auth()->id())
                 ->first();
-    
+
             if (!$company) {
                 abort(403);
             }
         }
-    
-        DB::transaction(function () use ($request) {
 
-            $user = User::create([
-                'username' => $request->username,
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-        
-            // IMPORTANT: assign role in Bouncer
-            Bouncer::assign('company_staff')->to($user);
-        
-            CompanyStaff::create([
-                'company_id' => $request->company_id,
-                'user_id' => $user->id,
-            ]);
-        });
-        
+        /**
+         * CREATE USER
+         */
+        $user = User::create([
+            'company_id' => $request->company_id,
+            'username'   => $request->username,
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'password'   => Hash::make($request->password),
+        ]);
+
+        /**
+         * ASSIGN ROLE
+         */
+        Bouncer::assign('company_staff')->to($user);
+
         return redirect()
             ->route('company-staff.index')
             ->with('success', 'Staff created successfully');
     }
-    public function assignStaff(Request $request)
-    {
-        $user = User::find($request->user_id);
 
-        CompanyStaff::create([
-            'company_id' => $request->company_id,
-            'user_id' => $user->id,
-        ]);
-
-        Bouncer::assign('company_staff')->to($user);
-
-        return back();
-    }
     /**
      * EDIT FORM
      */
-    public function edit(CompanyStaff $companyStaff)
+    public function edit(User $user)
     {
+        if (!$user->isAn('company_staff')) {
+            abort(404);
+        }
+
         if (
             !auth()->user()->isAn('admin') &&
             !auth()->user()->isAn('superadmin')
         ) {
 
-            if ($companyStaff->company->user_id != auth()->id()) {
+            if ($user->company->user_id != auth()->id()) {
                 abort(403);
             }
 
@@ -154,89 +144,67 @@ class CompanyStaffController extends Controller
             $companies = Company::all();
         }
 
-        return view('company-staff.create', compact('companyStaff', 'companies'));
+        return view('company-staff.create', compact('user', 'companies'));
     }
 
     /**
      * UPDATE STAFF
      */
-    public function update(Request $request, CompanyStaff $companyStaff)
+    public function update(Request $request, User $user)
     {
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
-            'username' => 'required|unique:users,username,' . $companyStaff->user_id . ',id',
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $companyStaff->user_id . ',id',
+            'username'   => 'required|unique:users,username,' . $user->id,
+            'name'       => 'required',
+            'email'      => 'required|email|unique:users,email,' . $user->id,
         ]);
-    
+
         if ($validator->fails()) {
-    
+
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-    
+
         if (
             !auth()->user()->isAn('admin') &&
             !auth()->user()->isAn('superadmin')
         ) {
-    
-            if ($companyStaff->company->user_id != auth()->id()) {
-                abort(403);
-            }
-    
-            $company = Company::where('id', $request->company_id)
-                ->where('user_id', auth()->id())
-                ->first();
-    
-            if (!$company) {
+
+            if ($user->company->user_id != auth()->id()) {
                 abort(403);
             }
         }
-    
-        /**
-         * UPDATE USER
-         */
-        $companyStaff->user->update([
-            'username' => $request->username,
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
-    
-        /**
-         * UPDATE STAFF
-         */
-        $companyStaff->update([
+
+        $user->update([
             'company_id' => $request->company_id,
+            'username'   => $request->username,
+            'name'       => $request->name,
+            'email'      => $request->email,
         ]);
-    
+
         return redirect()
             ->route('company-staff.index')
             ->with('success', 'Staff updated successfully');
     }
+
     /**
      * DELETE STAFF
      */
-    public function destroy(CompanyStaff $companyStaff)
+    public function destroy(User $user)
     {
         if (
             !auth()->user()->isAn('admin') &&
             !auth()->user()->isAn('superadmin')
         ) {
-    
-            if ($companyStaff->company->user_id != auth()->id()) {
+
+            if ($user->company->user_id != auth()->id()) {
                 abort(403);
             }
         }
-    
-        $user = $companyStaff->user;
-    
-        $companyStaff->delete();
-    
-        if ($user) {
-            $user->delete();
-        }
-    
+
+        $user->delete();
+
         return redirect()
             ->route('company-staff.index')
             ->with('success', 'Staff deleted successfully');

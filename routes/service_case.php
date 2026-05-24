@@ -18,4 +18,5 @@ Route::prefix('service-cases')->as('service-cases.')->group(function () {
     Route::post('/complete/{serviceCase}', [ServiceCaseController::class, 'complete'])->name('complete');
     Route::get('/toggle-payment/{serviceCase}', [ServiceCaseController::class, 'togglePayment'])->name('toggle-payment');
     Route::get('/export', [ServiceCaseController::class, 'export'])->name('export');
+    
 });

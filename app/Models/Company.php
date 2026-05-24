@@ -23,11 +23,15 @@ class Company extends Model
         return $this->belongsTo(Role::class, 'role_id');
     }
 
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    
     public function staffs()
     {
-        return $this->hasMany(CompanyStaff::class);
+        return $this->hasMany(User::class, 'company_id');
     }
-
     public function user()
     {
         return $this->belongsTo(User::class);

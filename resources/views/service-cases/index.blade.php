@@ -143,57 +143,86 @@
                 {{-- STATUS BUTTONS --}}
                 <div class="mt-4 d-flex flex-wrap gap-2">
 
-                    <a href="{{ route('service-cases.index') }}"
+                    {{-- PENDING --}}
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'pending',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                        'company_id' => request('company_id'),
+                    ]) }}"
+                        class="btn btn-secondary">
+
+                        Pending
+                        
+
+                    </a>
+
+                    {{-- IN PROGRESS --}}
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'accepted',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                        'company_id' => request('company_id'),
+                    ]) }}"
+                        class="btn btn-info">
+
+                        In Progress
+                       
+
+                    </a>
+
+                    {{-- WORK DONE --}}
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'service_done',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                        'company_id' => request('company_id'),
+                    ]) }}"
+                        class="btn btn-warning text-dark">
+
+                        Work Done
+                        
+
+                    </a>
+
+                    {{-- COMPLETED --}}
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'complete',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                        'company_id' => request('company_id'),
+                    ]) }}"
+                        class="btn btn-success">
+
+                        Completed
+                       
+
+                    </a>
+
+                    {{-- CANCELLED --}}
+                    <a href="{{ route('service-cases.index', [
+                        'status' => 'cancel',
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                        'company_id' => request('company_id'),
+                    ]) }}"
+                        class="btn btn-danger">
+
+                        Cancelled
+                        
+
+                    </a>
+                    {{-- ALL --}}
+                    <a href="{{ route('service-cases.index', [
+                        'date_from' => request('date_from'),
+                        'date_to' => request('date_to'),
+                        'company_id' => request('company_id'),
+                    ]) }}"
                         class="btn btn-dark">
 
                         All
 
                     </a>
-
-                    <a href="{{ route('service-cases.index', [
-                        'status' => 'pending',
-                        'date_from' => request('date_from'),
-                        'date_to' => request('date_to'),
-                    ]) }}"
-                        class="btn btn-warning">
-
-                        Pending
-
-                    </a>
-
-                    <a href="{{ route('service-cases.index', [
-                        'status' => 'accepted',
-                        'date_from' => request('date_from'),
-                        'date_to' => request('date_to'),
-                    ]) }}"
-                        class="btn btn-info">
-
-                        Accepted
-
-                    </a>
-
-                    <a href="{{ route('service-cases.index', [
-                        'status' => 'cancel',
-                        'date_from' => request('date_from'),
-                        'date_to' => request('date_to'),
-                    ]) }}"
-                        class="btn btn-danger">
-
-                        Cancel
-
-                    </a>
-
-                    <a href="{{ route('service-cases.index', [
-                        'status' => 'complete',
-                        'date_from' => request('date_from'),
-                        'date_to' => request('date_to'),
-                    ]) }}"
-                        class="btn btn-success">
-
-                        Complete
-
-                    </a>
-
                 </div>
 
             </form>
@@ -230,11 +259,17 @@
 
                     @foreach($serviceCases as $index => $row)
 
-                        @php
+                    @php
 
-                            $days = now()->diffInDays(
-                                $row->submit_datetime
-                            );
+                    $durationColor = 'secondary';
+
+                    if($row->duration){
+
+                        if(str_contains($row->duration, 'day')){
+
+                            preg_match('/(\d+)/', $row->duration, $matches);
+
+                            $days = $matches[1] ?? 0;
 
                             if($days <= 2){
 
@@ -247,9 +282,18 @@
                             }else{
 
                                 $durationColor = 'danger';
+
                             }
 
-                        @endphp
+                        }else{
+
+                            $durationColor = 'success';
+
+                        }
+
+                    }
+
+                    @endphp
 
                         <tr>
 
@@ -260,12 +304,12 @@
 
                             {{-- COMPANY --}}
                             <td>
-                                {{ $row->companyStaff->company->company_name ?? '-' }}
+                                {{ $row->company->company_name ?? '-' }}
                             </td>
 
                             {{-- STAFF --}}
                             <td>
-                                {{ $row->companyStaff->user->name ?? '-' }}
+                                {{ $row->user->name ?? '-' }}
                             </td>
 
                             {{-- DESCRIPTION --}}
@@ -280,32 +324,38 @@
 
                                 @if($row->status == 'pending')
 
-                                    <span class="badge bg-warning">
+                                    <span class="badge bg-secondary">
                                         Pending
                                     </span>
 
                                 @elseif($row->status == 'accepted')
 
                                     <span class="badge bg-info">
-                                        Accepted
+                                        In Progress
+                                    </span>
+
+                                @elseif($row->status == 'service_done')
+
+                                    <span class="badge bg-warning text-dark">
+                                        Work Done
                                     </span>
 
                                 @elseif($row->status == 'complete')
 
                                     <span class="badge bg-success">
-                                        Complete
-                                    </span>
-
-                                @elseif($row->status == 'reject')
-
-                                    <span class="badge bg-danger">
-                                        Reject
+                                        Completed
                                     </span>
 
                                 @elseif($row->status == 'cancel')
 
-                                    <span class="badge bg-secondary">
-                                        Cancel
+                                    <span class="badge bg-danger">
+                                        Cancelled
+                                    </span>
+
+                                @elseif($row->status == 'reject')
+
+                                    <span class="badge bg-dark">
+                                        Rejected
                                     </span>
 
                                 @endif
@@ -315,11 +365,23 @@
                             {{-- DURATION --}}
                             <td>
 
-                                <span class="badge bg-{{ $durationColor }}">
+                                @if($row->duration)
 
-                                    {{ $days }} Day(s)
+                                    <span class="badge bg-{{ $durationColor }}">
 
-                                </span>
+                                        {{ $row->duration }}
+
+                                    </span>
+
+                                @else
+
+                                    <span class="badge bg-secondary">
+
+                                        Pending
+
+                                    </span>
+
+                                @endif
 
                             </td>
 

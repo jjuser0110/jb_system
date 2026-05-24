@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::table('service_cases', function (Blueprint $table) {
+            $table->integer('duration')->nullable()->after('accepted_at');
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('service_cases', function (Blueprint $table) {
+            $table->dropColumn('duration');
+        });
     }
 };

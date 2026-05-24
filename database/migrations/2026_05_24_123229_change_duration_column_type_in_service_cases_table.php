@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('company_staff', function (Blueprint $table) {
-            $table->renameColumn('customer_id', 'company_id');
+        Schema::table('service_cases', function (Blueprint $table) {
+            $table->string('duration')->nullable()->change();
         });
     }
 
     public function down(): void
     {
-        Schema::table('company_staff', function (Blueprint $table) {
-            $table->renameColumn('company_id', 'customer_id');
+        Schema::table('service_cases', function (Blueprint $table) {
+            $table->integer('duration')->nullable()->change();
         });
     }
 };

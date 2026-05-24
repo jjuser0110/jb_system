@@ -446,7 +446,12 @@
                             </div>
                             <div class="flex-grow-1">
                               <span class="fw-medium d-block lh-1">{{Auth::user()->username??''}}</span>
-                              <small>{{Auth::user()->role->title??''}}</small>
+                              <small>
+                                  {{ Auth::user()->roles->first()->title ?? '' }}
+                              </small><br>
+                              <small>
+                                  {{ Auth::user()->company->company_name ?? '' }}
+                              </small>
                             </div>
                           </div>
                         </a>

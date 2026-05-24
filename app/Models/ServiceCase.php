@@ -11,7 +11,8 @@ class ServiceCase extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $fillable = [
-        'company_staff_id',
+        'user_id',
+        'company_id',
         'submit_datetime',
         'description',
         'status',
@@ -20,6 +21,8 @@ class ServiceCase extends Model implements HasMedia
         'receipt',
         'price',
         'accepted_at',
+        'duration',
+        'remark',
     ];
 
     protected $casts = [
@@ -42,6 +45,11 @@ class ServiceCase extends Model implements HasMedia
         return $this->belongsTo(User::class, 'staff_id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function getDurationColorAttribute()
     {
         if (!$this->submit_datetime) {
@@ -59,5 +67,40 @@ class ServiceCase extends Model implements HasMedia
         }
 
         return 'danger';
+    }
+
+    protected static function booted()
+    {
+        static::saving(function ($serviceCase) {
+    
+            if ($serviceCase->accepted_at && $serviceCase->completed_at) {
+    
+                $accepted = \Carbon\Carbon::parse($serviceCase->accepted_at);
+                $completed = \Carbon\Carbon::parse($serviceCase->completed_at);
+    
+                $days = $accepted->diffInDays($completed);
+                $hours = $accepted->copy()->addDays($days)->diffInHours($completed);
+                $minutes = $accepted->copy()
+                    ->addDays($days)
+                    ->addHours($hours)
+                    ->diffInMinutes($completed);
+    
+                $parts = [];
+    
+                if ($days > 0) {
+                    $parts[] = $days . ' day' . ($days > 1 ? 's' : '');
+                }
+    
+                if ($hours > 0) {
+                    $parts[] = $hours . ' hour' . ($hours > 1 ? 's' : '');
+                }
+    
+                if ($minutes > 0) {
+                    $parts[] = $minutes . ' minute' . ($minutes > 1 ? 's' : '');
+                }
+    
+                $serviceCase->duration = implode(' ', $parts);
+            }
+        });
     }
 }

@@ -49,7 +49,6 @@ class HomeController extends Controller
             ->sum('price');
 
         $recentCases = ServiceCase::with([
-                'service',
                 'companyStaff'
             ])
             ->latest()

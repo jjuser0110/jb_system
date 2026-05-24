@@ -55,11 +55,11 @@
 
                         <tr>
 
-                            <td>{{ $staff->user->username ?? '-' }}</td>
+                            <td>{{ $staff->username ?? '-' }}</td>
 
-                            <td>{{ $staff->user->name ?? '-' }}</td>
+                            <td>{{ $staff->name ?? '-' }}</td>
 
-                            <td>{{ $staff->user->email ?? '-' }}</td>
+                            <td>{{ $staff->email ?? '-' }}</td>
 
                             <td>
                                 {{ $staff->company->company_name ?? '-' }}

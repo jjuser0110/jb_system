@@ -5,124 +5,122 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ServiceCase;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class AdminServiceCaseController extends Controller
 {
+    private function adminOnly()
+    {
+        abort_unless(
+            auth()->user()->isAn('admin') ||
+            auth()->user()->isAn('superadmin'),
+            403
+        );
+    }
+
     /**
-     * LIST ALL SERVICE CASE
+     * LIST ALL CASES (ADMIN)
      */
     public function index(Request $request)
     {
-        // ONLY ADMIN / SUPERADMIN
-        if (
-            !auth()->user()->isAn('admin') &&
-            !auth()->user()->isAn('superadmin')
-        ) {
-            abort(403);
+        $this->adminOnly();
+
+        $query = ServiceCase::with(['user.company']);
+
+        if ($request->status) {
+            $query->where('status', $request->status);
         }
 
-        $status = $request->status;
+        $serviceCases = $query->latest()->paginate(10);
 
-        $query = ServiceCase::with([
-            'companyStaff.user',
-            'service',
-        ]);
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $serviceCases = $query
-            ->latest()
-            ->paginate(10);
-
-        return view(
-            'admin.manage-case.index',
-            compact('serviceCases', 'status')
-        );
+        return view('admin.manage-case.index', compact('serviceCases'));
     }
 
     /**
-     * UPDATE STATUS
+     * UPDATE STATUS (UNIFIED FLOW)
      */
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, ServiceCase $serviceCase)
     {
-        if (
-            !auth()->user()->isAn('admin') &&
-            !auth()->user()->isAn('superadmin')
-        ) {
-            abort(403);
-        }
-
+        $this->adminOnly();
+    
         $request->validate([
-            'status' => 'required|in:pending,inprogress,complete,cancel',
+            'status' => 'required|in:pending,accepted,service_done,complete,cancel',
             'price' => 'nullable|numeric|min:0',
         ]);
-
-        $serviceCase = ServiceCase::findOrFail($id);
-
+    
+        // 🚨 BLOCK completing if not paid
+        if ($request->status === 'complete' && !$serviceCase->is_paid) {
+            return back()->with('error', 'User must complete payment first.');
+        }
+    
         $serviceCase->status = $request->status;
-
-        // IN PROGRESS
-        if ($request->status == 'inprogress') {
+    
+        // START WORK
+        if ($request->status === 'accepted') {
             $serviceCase->accepted_at = now();
         }
-
-        // COMPLETE
-        if ($request->status == 'complete') {
-
+    
+        // COMPLETE WORK (ONLY AFTER PAYMENT)
+        if ($request->status === 'complete') {
             $serviceCase->completed_at = now();
-
             $serviceCase->price = $request->price;
         }
-
+    
         $serviceCase->save();
-
-        return back()->with(
-            'success',
-            'Service case updated successfully.'
-        );
+    
+        return back()->with('success', 'Status updated successfully');
     }
-
     /**
-     * UPDATE PAYMENT
+     * PAYMENT UPDATE
      */
-    public function updatePayment(Request $request, $id)
+    public function updatePayment(Request $request, ServiceCase $serviceCase)
     {
-        if (
-            !auth()->user()->isAn('admin') &&
-            !auth()->user()->isAn('superadmin')
-        ) {
-            abort(403);
-        }
-
-        $serviceCase = ServiceCase::findOrFail($id);
-
-        // VALIDATION
+        $this->adminOnly();
+    
         $request->validate([
+            'price' => 'required|numeric|min:0',
             'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'remark' => 'nullable|string',
         ]);
-
-        // DELETE OLD RECEIPT
+    
         if ($serviceCase->receipt) {
-
             Storage::disk('public')->delete($serviceCase->receipt);
         }
+    
+        $path = $request->file('receipt')->store('receipts', 'public');
+    
+        $serviceCase->update([
+            'price' => $request->price,
+            'receipt' => $path,
+            'remark' => $request->remark,
+            'is_paid' => true,
+            'status' => 'complete',
+            'completed_at' => now(),
+        ]);
+    
+        return back()->with('success', 'Payment completed & case closed');
+    }
 
-        // UPLOAD RECEIPT
-        $receiptPath = $request
-            ->file('receipt')
-            ->store('receipts', 'public');
+    public function getDurationAttribute()
+    {
+        if (!$this->completed_at || !$this->submit_datetime) {
+            return null;
+        }
 
-        // UPDATE
-        $serviceCase->is_paid = true;
-        $serviceCase->receipt = $receiptPath;
+        $start = Carbon::parse($this->submit_datetime);
+        $end = Carbon::parse($this->completed_at);
 
-        $serviceCase->save();
+        $diffInMinutes = $start->diffInMinutes($end);
 
-        return back()->with(
-            'success',
-            'Payment updated successfully.'
-        );
+        $days = floor($diffInMinutes / 1440);
+        $hours = floor(($diffInMinutes % 1440) / 60);
+        $minutes = $diffInMinutes % 60;
+
+        return [
+            'days' => $days,
+            'hours' => $hours,
+            'minutes' => $minutes,
+            'total_minutes' => $diffInMinutes,
+        ];
     }
 }

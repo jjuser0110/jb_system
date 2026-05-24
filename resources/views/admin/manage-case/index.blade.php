@@ -4,373 +4,203 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
 
-    <h4 class="mb-4">
-        Service Case Management
-    </h4>
+    <h4 class="mb-4">Service Case Management</h4>
 
     {{-- FILTER --}}
     <div class="mb-3 d-flex gap-2 flex-wrap">
 
-        <a href="{{ route('admin.manage-case.index') }}"
-           class="btn btn-secondary">
-            ALL
-        </a>
+        <a href="{{ route('admin.manage-case.index') }}" class="btn btn-secondary">ALL</a>
 
-        <a href="{{ route('admin.manage-case.index', ['status' => 'pending']) }}"
-           class="btn btn-warning">
-            Pending
-        </a>
+        <a href="{{ route('admin.manage-case.index', ['status' => 'pending']) }}" class="btn btn-warning">Pending</a>
 
-        <a href="{{ route('admin.manage-case.index', ['status' => 'inprogress']) }}"
-           class="btn btn-info">
-            In Progress
-        </a>
+        <a href="{{ route('admin.manage-case.index', ['status' => 'accepted']) }}" class="btn btn-info">In Progress</a>
 
-        <a href="{{ route('admin.manage-case.index', ['status' => 'complete']) }}"
-           class="btn btn-success">
-            Complete
-        </a>
+        <a href="{{ route('admin.manage-case.index', ['status' => 'service_done']) }}" class="btn btn-primary">Work Done</a>
 
-        <a href="{{ route('admin.manage-case.index', ['status' => 'cancel']) }}"
-           class="btn btn-secondary">
-            Cancel
-        </a>
+        <a href="{{ route('admin.manage-case.index', ['status' => 'complete']) }}" class="btn btn-success">Completed</a>
+
+        <a href="{{ route('admin.manage-case.index', ['status' => 'cancel']) }}" class="btn btn-danger">Cancelled</a>
 
     </div>
 
     <div class="card">
         <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
+
                 <thead class="table-light">
                     <tr>
                         <th>ID</th>
                         <th>Staff</th>
-                        <th class="d-none d-md-table-cell">
-                            Service
-                        </th>
+                        <th>Description</th>
                         <th>Status</th>
-                        <th class="d-none d-md-table-cell">
-                            Price
-                        </th>
-                        <th class="d-none d-md-table-cell">
-                            Paid
-                        </th>
-                        <th class="d-none d-md-table-cell">
-                            Submit Date
-                        </th>
-                        <th width="250">
-                            Action
-                        </th>
+                        <th>Price</th>
+                        <th>Payment</th>
+                        <th>Submit Date</th>
+                        <th width="280">Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    @forelse($serviceCases as $case)
-                        <tr>
-                            <td>
-                                #{{ $case->id }}
-                            </td>               
-                            <td>
-                                <button
-                                    class="btn btn-link p-0 text-start d-md-none"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#caseModal{{ $case->id }}">
-                                    {{ $case->companyStaff->user->name ?? '-' }}
+
+                @forelse($serviceCases as $case)
+
+                    <tr>
+                        <td>#{{ $case->id }}</td>
+
+                        {{-- STAFF --}}
+                        <td>{{ $case->user->name ?? '-' }}</td>
+
+                        {{-- DESCRIPTION --}}
+                        <td>{{ $case->description ?? '-' }}</td>
+
+                        {{-- STATUS --}}
+                        <td>
+                            <span class="badge
+                                @if($case->status=='pending') bg-warning
+                                @elseif($case->status=='accepted') bg-info
+                                @elseif($case->status=='service_done') bg-primary
+                                @elseif($case->status=='complete') bg-success
+                                @else bg-danger
+                                @endif">
+                                {{ strtoupper(str_replace('_',' ', $case->status)) }}
+                            </span>
+                        </td>
+
+                        {{-- PRICE --}}
+                        <td>
+                            @if($case->price)
+                                RM {{ number_format($case->price,2) }}
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        {{-- PAYMENT --}}
+                        <td>
+                            @if($case->is_paid)
+                                <span class="badge bg-success">PAID</span>
+                            @else
+                                <span class="badge bg-danger">UNPAID</span>
+                            @endif
+                        </td>
+
+                        {{-- DATE --}}
+                        <td>{{ $case->submit_datetime }}</td>
+
+                        {{-- ACTION --}}
+                        <td>
+
+                        {{-- START WORK --}}
+                        @if($case->status == 'pending')
+                            <form method="POST" action="{{ route('admin.manage-case.status', $case) }}">
+                                @csrf
+                                <input type="hidden" name="status" value="accepted">
+                                <button 
+                                    class="btn btn-info btn-sm w-100 mb-1"
+                                    onclick="return confirm('Are you sure want to proceed this service?')">
+                                    Start Work
                                 </button>
-                                <span class="d-none d-md-inline">
-                                    {{ $case->companyStaff->user->name ?? '-' }}
-                                </span>
-                            </td>
-                            <td class="d-none d-md-table-cell">
-                                {{ $case->service->name ?? '-' }}
-                            </td>
-                            <td>
-                                @if($case->status == 'pending')
-                                    <span class="badge bg-warning">
-                                        Pending
-                                    </span>
-                                @elseif($case->status == 'inprogress')
-                                    <span class="badge bg-info">
-                                        In Progress
-                                    </span>
-                                @elseif($case->status == 'complete')
-                                    <span class="badge bg-success">
-                                        Complete
-                                    </span>
-                                @elseif($case->status == 'cancel')
-                                    <span class="badge bg-secondary">
-                                        Cancel
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="d-none d-md-table-cell">
-                                @if($case->price)
-                                    RM {{ number_format($case->price, 2) }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td class="d-none d-md-table-cell">
-                                @if($case->is_paid)
-                                    <span class="badge bg-success">
-                                        PAID
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger">
-                                        UNPAID
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="d-none d-md-table-cell">
-                                {{ $case->submit_datetime }}
-                            </td>
-                            <td>
-                                <button
-                                    class="btn btn-primary btn-sm d-md-none w-100"
+                            </form>
+                        @endif
+
+                        {{-- MARK DONE --}}
+                        @if($case->status == 'accepted')
+                            <form method="POST" action="{{ route('admin.manage-case.status', $case) }}">
+                                @csrf
+                                <input type="hidden" name="status" value="service_done">
+                                <button class="btn btn-primary btn-sm w-100 mb-1">Mark Work Done</button>
+                            </form>
+                        @endif
+
+                        {{-- PAYMENT POPUP (NOW CONTAINS PRICE + REMARK + RECEIPT) --}}
+                        @if($case->status == 'service_done' && !$case->is_paid)
+                            <button class="btn btn-warning btn-sm w-100 mb-1"
                                     data-bs-toggle="modal"
-                                    data-bs-target="#caseModal{{ $case->id }}">
-                                    View
-                                </button>
-                                <div class="d-none d-md-block">
-                                    @if($case->status == 'pending')
-                                        <form method="POST"
-                                              action="{{ route('admin.manage-case.status', $case->id) }}"
-                                              class="mb-2">
-                                            @csrf
-                                            <input type="hidden"
-                                                   name="status"
-                                                   value="inprogress">
-                                            <button class="btn btn-info btn-sm w-100">
-                                                In Progress
-                                            </button>
-                                        </form>
-                                    @endif
-                                    @if($case->status == 'inprogress')
-                                        <form method="POST"
-                                              action="{{ route('admin.manage-case.status', $case->id) }}"
-                                              class="mb-2">
-                                            @csrf
-                                            <input type="hidden"
-                                                   name="status"
-                                                   value="complete">
-                                            <input type="number"
-                                                   step="0.01"
-                                                   min="0"
-                                                   name="price"
-                                                   class="form-control mb-2"
-                                                   placeholder="Input Price"
-                                                   required>
-                                            <button class="btn btn-success btn-sm w-100">
-                                                Complete
-                                            </button>
-                                        </form>
-                                    @endif
-                                    @if(
-                                        $case->status == 'pending' ||
-                                        $case->status == 'inprogress'
-                                    )
-                                        <form method="POST"
-                                              action="{{ route('admin.manage-case.status', $case->id) }}"
-                                              class="mb-2">
-                                            @csrf
-                                            <input type="hidden"
-                                                   name="status"
-                                                   value="cancel">
-                                            <button class="btn btn-secondary btn-sm w-100">
-                                                Cancel
-                                            </button>
-                                        </form>
-                                    @endif
-                                    @if($case->status == 'complete')
-                                        @if($case->is_paid)
-                                            <div class="mb-2">
-                                                <span class="badge bg-success w-100">
-                                                    PAID
-                                                </span>
-                                            </div>
-                                            @if($case->receipt)
-                                                <a href="{{ asset('storage/' . $case->receipt) }}"
-                                                   target="_blank"
-                                                   class="btn btn-primary btn-sm w-100">
-                                                    View Receipt
-                                                </a>
-                                            @endif
-                                        @else
-                                            <form method="POST"
-                                                  action="{{ route('admin.manage-case.payment', $case->id) }}"
-                                                  enctype="multipart/form-data">
-                                                @csrf
-                                                <input type="file"
-                                                       name="receipt"
-                                                       class="form-control mb-2"
-                                                       required>
-                                                <button class="btn btn-dark btn-sm w-100">
-                                                    Mark Paid
-                                                </button>
-                                            </form>
-                                        @endif
-                                    @endif
+                                    data-bs-target="#paymentModal{{ $case->id }}">
+                                Payment & Complete
+                            </button>
+                        @endif
+
+                        {{-- COMPLETED (NO FORM ANYMORE) --}}
+                        @if($case->status == 'complete')
+                            <span class="badge bg-success w-100 d-block">Completed</span>
+                        @endif
+
+                        {{-- CANCEL --}}
+                        @if(in_array($case->status,['pending','accepted','service_done']))
+                            <form method="POST" action="{{ route('admin.manage-case.status', $case) }}">
+                                @csrf
+                                <input type="hidden" name="status" value="cancel">
+                                <button class="btn btn-secondary btn-sm w-100 mt-1">Cancel</button>
+                            </form>
+                        @endif
+
+                        </td>
+                    </tr>
+
+                    {{-- PAYMENT MODAL --}}
+                    <div class="modal fade" id="paymentModal{{ $case->id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+
+                            <form method="POST"
+                                action="{{ route('admin.manage-case.payment', $case) }}"
+                                enctype="multipart/form-data">
+
+                                @csrf
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Payment & Complete</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
-                            </td>
-                        </tr>
-                        {{-- MOBILE MODAL --}}
-                        <div class="modal fade"
-                             id="caseModal{{ $case->id }}"
-                             tabindex="-1">
-                            <div class="modal-dialog modal-dialog-scrollable">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">
-                                            Service Case #{{ $case->id }}
-                                        </h5>
-                                        <button type="button"
-                                                class="btn-close"
-                                                data-bs-dismiss="modal">
-                                        </button>
+
+                                <div class="modal-body">
+
+                                    {{-- PRICE --}}
+                                    <div class="mb-3">
+                                        <label>Price (RM)</label>
+                                        <input type="number"
+                                            name="price"
+                                            step="0.01"
+                                            class="form-control"
+                                            required>
                                     </div>
 
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <strong>Staff:</strong><br>
-                                            {{ $case->companyStaff->user->name ?? '-' }}
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Service:</strong><br>
-                                            {{ $case->service->name ?? '-' }}
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Status:</strong><br>
-                                            @if($case->status == 'pending')
-                                                <span class="badge bg-warning">
-                                                    Pending
-                                                </span>
-                                            @elseif($case->status == 'inprogress')
-                                                <span class="badge bg-info">
-                                                    In Progress
-                                                </span>
-                                            @elseif($case->status == 'complete')
-                                                <span class="badge bg-success">
-                                                    Complete
-                                                </span>
-                                            @elseif($case->status == 'cancel')
-                                                <span class="badge bg-secondary">
-                                                    Cancel
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <strong>Price:</strong><br>
-                                            @if($case->price)
-                                                RM {{ number_format($case->price, 2) }}
-                                            @else
-                                                -
-                                            @endif
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <strong>Payment:</strong><br>
-                                            @if($case->is_paid)
-                                                <span class="badge bg-success">
-                                                    PAID
-                                                </span>
-                                            @else
-                                                <span class="badge bg-danger">
-                                                    UNPAID
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <strong>Submit Date:</strong><br>
-                                            {{ $case->submit_datetime }}
-                                        </div>
-
-                                        @if($case->receipt)
-                                            <div class="mb-3">
-                                                <a href="{{ asset('storage/' . $case->receipt) }}"
-                                                   target="_blank"
-                                                   class="btn btn-primary w-100">
-                                                    View Receipt
-                                                </a>
-                                            </div>
-                                        @endif
-
-                                        @if($case->status == 'pending')
-                                            <form method="POST"
-                                                  action="{{ route('admin.manage-case.status', $case->id) }}"
-                                                  class="mb-2">
-                                                @csrf
-                                                <input type="hidden"
-                                                       name="status"
-                                                       value="inprogress">
-                                                <button class="btn btn-info w-100">
-                                                    In Progress
-                                                </button>
-                                            </form>
-                                        @endif
-                                        @if($case->status == 'inprogress')
-                                            <form method="POST"
-                                                  action="{{ route('admin.manage-case.status', $case->id) }}">
-                                                @csrf
-                                                <input type="hidden"
-                                                       name="status"
-                                                       value="complete">
-                                                <input type="number"
-                                                       step="0.01"
-                                                       min="0"
-                                                       name="price"
-                                                       class="form-control mb-2"
-                                                       placeholder="Input Price"
-                                                       required>
-                                                <button class="btn btn-success w-100">
-                                                    Complete
-                                                </button>
-                                            </form>
-                                        @endif
-
-                                        @if(
-                                            $case->status == 'pending' ||
-                                            $case->status == 'inprogress'
-                                        )
-                                            <form method="POST"
-                                                  action="{{ route('admin.manage-case.status', $case->id) }}"
-                                                  class="mt-2">
-                                                @csrf
-                                                <input type="hidden"
-                                                       name="status"
-                                                       value="cancel">
-                                                <button class="btn btn-secondary w-100">
-                                                    Cancel
-                                                </button>
-                                            </form>
-                                        @endif
-
-                                        @if($case->status == 'complete' && !$case->is_paid)
-                                            <form method="POST"
-                                                  action="{{ route('admin.manage-case.payment', $case->id) }}"
-                                                  enctype="multipart/form-data"
-                                                  class="mt-3">
-                                                @csrf
-                                                <input type="file"
-                                                       name="receipt"
-                                                       class="form-control mb-2"
-                                                       required>
-                                                <button class="btn btn-dark w-100">
-                                                    Mark Paid
-                                                </button>
-                                            </form>
-                                        @endif
+                                    {{-- RECEIPT --}}
+                                    <div class="mb-3">
+                                        <label>Receipt / Photo</label>
+                                        <input type="file"
+                                            name="receipt"
+                                            class="form-control"
+                                            required>
                                     </div>
+
+                                    {{-- REMARK --}}
+                                    <div class="mb-3">
+                                        <label>Remark</label>
+                                        <textarea name="remark" class="form-control"></textarea>
+                                    </div>
+
                                 </div>
-                            </div>
+
+                                <div class="modal-footer">
+                                    <button class="btn btn-success w-100">
+                                        Pay & Complete
+                                    </button>
+                                </div>
+
+                            </form>
+
                         </div>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center">
-                                No Record Found
-                            </td>
-                        </tr>
-                    @endforelse
+                    </div>
+                    </div>
+
+                @empty
+                    <tr>
+                        <td colspan="9" class="text-center">No Record Found</td>
+                    </tr>
+                @endforelse
+
                 </tbody>
             </table>
         </div>
@@ -378,9 +208,7 @@
 
     {{-- PAGINATION --}}
     <div class="mt-3">
-
         {{ $serviceCases->links() }}
-
     </div>
 
 </div>

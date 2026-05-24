@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\ServiceCase;
 use App\Models\Company;
-use App\Models\CompanyStaff;
 use Illuminate\Http\Request;
-use App\Exports\ServiceCaseExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ServiceCaseExport;
 
 class ServiceCaseController extends Controller
 {
@@ -24,56 +23,35 @@ class ServiceCaseController extends Controller
         $dateTo = $request->date_to
             ?? now()->endOfMonth()->format('Y-m-d');
 
-        $query = ServiceCase::with([
-            'companyStaff.user',
-            'companyStaff.company',
-            'staff'
-        ]);
+        $query = ServiceCase::with(['user.company']);
 
         /**
-         * COMPANY STAFF ONLY SEE OWN COMPANY
+         * COMPANY RESTRICTION
          */
         if (
             !$user->isAn('admin') &&
-            !$user->isAn('owner') &&
             !$user->isAn('superadmin')
         ) {
-
-            $companyStaff = CompanyStaff::where(
-                'user_id',
-                $user->id
-            )->first();
-
-            if (!$companyStaff) {
+            if (!$user->company_id) {
                 abort(403);
             }
 
-            $query->whereHas('companyStaff', function ($q) use ($companyStaff) {
-                $q->where('company_id', $companyStaff->company_id);
-            });
+            $query->where('company_id', $user->company_id);
 
-            $companies = Company::where(
-                'id',
-                $companyStaff->company_id
-            )->get();
-
+            $companies = Company::where('id', $user->company_id)->get();
         } else {
-
             $companies = Company::orderBy('company_name')->get();
         }
 
         /**
-         * COMPANY FILTER
+         * FILTER: COMPANY
          */
         if ($request->company_id) {
-
-            $query->whereHas('companyStaff', function ($q) use ($request) {
-                $q->where('company_id', $request->company_id);
-            });
+            $query->where('company_id', $request->company_id);
         }
 
         /**
-         * STATUS FILTER
+         * FILTER: STATUS
          */
         if ($request->status) {
             $query->where('status', $request->status);
@@ -85,9 +63,7 @@ class ServiceCaseController extends Controller
         $query->whereDate('submit_datetime', '>=', $dateFrom)
             ->whereDate('submit_datetime', '<=', $dateTo);
 
-        $serviceCases = $query
-            ->latest()
-            ->get();
+        $serviceCases = $query->latest()->get();
 
         return view('service-cases.index', compact(
             'serviceCases',
@@ -106,41 +82,18 @@ class ServiceCaseController extends Controller
 
         if (
             $user->isAn('admin') ||
-            $user->isAn('owner') ||
             $user->isAn('superadmin')
         ) {
-
             $companies = Company::all();
-
-            $companyStaffs = CompanyStaff::with(
-                'user',
-                'company'
-            )->get();
-
         } else {
-
-            $companyStaff = CompanyStaff::with('company')
-                ->where('user_id', $user->id)
-                ->first();
-
-            if (!$companyStaff) {
+            if (!$user->company_id) {
                 abort(403);
             }
 
-            $companies = Company::where(
-                'id',
-                $companyStaff->company_id
-            )->get();
-
-            $companyStaffs = CompanyStaff::with('user')
-                ->where('id', $companyStaff->id)
-                ->get();
+            $companies = Company::where('id', $user->company_id)->get();
         }
 
-        return view('service-cases.create', compact(
-            'companies',
-            'companyStaffs'
-        ));
+        return view('service-cases.create', compact('companies'));
     }
 
     /**
@@ -156,46 +109,19 @@ class ServiceCaseController extends Controller
 
         $user = auth()->user();
 
-        /**
-         * ADMIN / OWNER
-         */
-        if (
-            $user->isAn('admin') ||
-            $user->isAn('owner') ||
-            $user->isAn('superadmin')
-        ) {
-
-            $companyStaffId = $request->company_staff_id;
-
-        } else {
-
-            /**
-             * COMPANY STAFF
-             */
-            $companyStaff = CompanyStaff::where(
-                'user_id',
-                $user->id
-            )->first();
-
-            if (!$companyStaff) {
-                abort(403);
-            }
-
-            $companyStaffId = $companyStaff->id;
+        if (!$user->company_id) {
+            abort(403);
         }
 
         $serviceCase = ServiceCase::create([
-            'company_staff_id' => $companyStaffId,
+            'user_id' => $user->id,
+            'company_id' => $user->company_id,
             'description' => $request->description,
             'submit_datetime' => $request->submit_datetime,
             'status' => 'pending',
         ]);
 
-        /**
-         * PHOTO UPLOAD
-         */
         if ($request->hasFile('photo')) {
-
             $serviceCase
                 ->addMediaFromRequest('photo')
                 ->toMediaCollection('photos');
@@ -207,58 +133,28 @@ class ServiceCaseController extends Controller
     }
 
     /**
-     * EDIT FORM
+     * EDIT
      */
     public function edit(ServiceCase $serviceCase)
     {
         $user = auth()->user();
 
-        /**
-         * COMPANY STAFF ONLY
-         */
         if (
             !$user->isAn('admin') &&
-            !$user->isAn('owner') &&
             !$user->isAn('superadmin')
         ) {
-
-            $companyStaff = CompanyStaff::where(
-                'user_id',
-                $user->id
-            )->first();
-
-            if (!$companyStaff) {
+            if ($serviceCase->company_id !== $user->company_id) {
                 abort(403);
             }
-
-            abort_if(
-                $serviceCase->companyStaff->company_id !== $companyStaff->company_id,
-                403
-            );
-
-            $companies = Company::where(
-                'id',
-                $companyStaff->company_id
-            )->get();
-
-            $companyStaffs = CompanyStaff::with('user')
-                ->where('id', $companyStaff->id)
-                ->get();
-
-        } else {
-
-            $companies = Company::all();
-
-            $companyStaffs = CompanyStaff::with(
-                'user',
-                'company'
-            )->get();
         }
+
+        $companies = $user->isAn('admin') || $user->isAn('superadmin')
+            ? Company::all()
+            : Company::where('id', $user->company_id)->get();
 
         return view('service-cases.create', compact(
             'serviceCase',
-            'companies',
-            'companyStaffs'
+            'companies'
         ));
     }
 
@@ -270,50 +166,32 @@ class ServiceCaseController extends Controller
         $request->validate([
             'submit_datetime' => 'required',
             'description' => 'required|string',
+            'status' => 'required|in:pending,accepted,service_done,complete,cancel,reject',
             'photo' => 'nullable|image|max:5120',
         ]);
 
         $user = auth()->user();
 
-        /**
-         * COMPANY STAFF ONLY
-         */
         if (
             !$user->isAn('admin') &&
-            !$user->isAn('owner') &&
             !$user->isAn('superadmin')
         ) {
-
-            $companyStaff = CompanyStaff::where(
-                'user_id',
-                $user->id
-            )->first();
-
-            if (!$companyStaff) {
+            if ($serviceCase->company_id !== $user->company_id) {
                 abort(403);
             }
-
-            abort_if(
-                $serviceCase->companyStaff->company_id !== $companyStaff->company_id,
-                403
-            );
         }
 
         $serviceCase->update([
             'description' => $request->description,
             'submit_datetime' => $request->submit_datetime,
+            'status' => $request->status,
             'completed_at' => $request->status === 'complete'
                 ? now()
                 : null,
         ]);
 
-        /**
-         * REPLACE PHOTO
-         */
         if ($request->hasFile('photo')) {
-
-            $serviceCase
-                ->clearMediaCollection('photos');
+            $serviceCase->clearMediaCollection('photos');
 
             $serviceCase
                 ->addMediaFromRequest('photo')
@@ -333,35 +211,16 @@ class ServiceCaseController extends Controller
         $user = auth()->user();
 
         if (
-            $user->isAn('admin') ||
-            $user->isAn('owner') ||
-            $user->isAn('superadmin')
+            !$user->isAn('admin') &&
+            !$user->isAn('superadmin')
         ) {
-
-            $serviceCase->clearMediaCollection('photos');
-
-            $serviceCase->delete();
-
-        } else {
-
-            $companyStaff = CompanyStaff::where(
-                'user_id',
-                $user->id
-            )->first();
-
-            if (!$companyStaff) {
+            if ($serviceCase->company_id !== $user->company_id) {
                 abort(403);
             }
-
-            abort_if(
-                $serviceCase->companyStaff->company_id !== $companyStaff->company_id,
-                403
-            );
-
-            $serviceCase->clearMediaCollection('photos');
-
-            $serviceCase->delete();
         }
+
+        $serviceCase->clearMediaCollection('photos');
+        $serviceCase->delete();
 
         return redirect()
             ->route('service-cases.index')
@@ -369,7 +228,7 @@ class ServiceCaseController extends Controller
     }
 
     /**
-     * ADMIN ONLY
+     * ADMIN CHECK
      */
     private function adminOnly()
     {
@@ -377,68 +236,64 @@ class ServiceCaseController extends Controller
 
         abort_unless(
             $user->isAn('admin') ||
-            $user->isAn('owner') ||
             $user->isAn('superadmin'),
             403
         );
     }
 
     /**
-     * PENDING
+     * STATUS LISTS
      */
     public function pending()
     {
         $this->adminOnly();
 
-        $serviceCases = ServiceCase::with([
-            'companyStaff.user',
-            'companyStaff.company',
-        ])
-        ->where('status', 'pending')
-        ->latest()
-        ->get();
+        $serviceCases = ServiceCase::with('user.company')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
 
         return view('service-cases.pending', compact('serviceCases'));
     }
 
-    /**
-     * ACCEPTED
-     */
     public function accepted()
     {
         $this->adminOnly();
 
-        $serviceCases = ServiceCase::with([
-            'companyStaff.user',
-            'companyStaff.company',
-        ])
-        ->where('status', 'accepted')
-        ->latest()
-        ->get();
+        $serviceCases = ServiceCase::with('user.company')
+            ->where('status', 'accepted')
+            ->latest()
+            ->get();
 
         return view('service-cases.accepted', compact('serviceCases'));
     }
 
-    /**
-     * COMPLETED
-     */
+    public function workDone()
+    {
+        $this->adminOnly();
+
+        $serviceCases = ServiceCase::with('user.company')
+            ->where('status', 'service_done')
+            ->latest()
+            ->get();
+
+        return view('service-cases.workdone', compact('serviceCases'));
+    }
+
     public function completed()
     {
         $this->adminOnly();
 
-        $serviceCases = ServiceCase::with([
-            'companyStaff.user',
-            'companyStaff.company',
-        ])
-        ->where('status', 'complete')
-        ->latest()
-        ->get();
+        $serviceCases = ServiceCase::with('user.company')
+            ->where('status', 'complete')
+            ->latest()
+            ->get();
 
         return view('service-cases.completed', compact('serviceCases'));
     }
 
     /**
-     * ACCEPT
+     * ACTIONS
      */
     public function accept(ServiceCase $serviceCase)
     {
@@ -452,9 +307,17 @@ class ServiceCaseController extends Controller
         return back()->with('success', 'Case accepted');
     }
 
-    /**
-     * COMPLETE
-     */
+    public function serviceDone(ServiceCase $serviceCase)
+    {
+        $this->adminOnly();
+
+        $serviceCase->update([
+            'status' => 'service_done',
+        ]);
+
+        return back()->with('success', 'Service marked as done');
+    }
+
     public function complete(Request $request, ServiceCase $serviceCase)
     {
         $this->adminOnly();
@@ -472,9 +335,6 @@ class ServiceCaseController extends Controller
         return back()->with('success', 'Case completed');
     }
 
-    /**
-     * TOGGLE PAYMENT
-     */
     public function togglePayment(ServiceCase $serviceCase)
     {
         $this->adminOnly();
@@ -491,16 +351,10 @@ class ServiceCaseController extends Controller
      */
     public function export(Request $request)
     {
-        $query = ServiceCase::with([
-            'companyStaff.user',
-            'companyStaff.company',
-        ]);
+        $query = ServiceCase::with(['user.company']);
 
         if ($request->company_id) {
-
-            $query->whereHas('companyStaff', function ($q) use ($request) {
-                $q->where('company_id', $request->company_id);
-            });
+            $query->where('company_id', $request->company_id);
         }
 
         if ($request->status) {
@@ -508,26 +362,14 @@ class ServiceCaseController extends Controller
         }
 
         if ($request->date_from) {
-
-            $query->whereDate(
-                'submit_datetime',
-                '>=',
-                $request->date_from
-            );
+            $query->whereDate('submit_datetime', '>=', $request->date_from);
         }
 
         if ($request->date_to) {
-
-            $query->whereDate(
-                'submit_datetime',
-                '<=',
-                $request->date_to
-            );
+            $query->whereDate('submit_datetime', '<=', $request->date_to);
         }
 
-        $serviceCases = $query
-            ->latest()
-            ->get();
+        $serviceCases = $query->latest()->get();
 
         return Excel::download(
             new ServiceCaseExport($serviceCases),
