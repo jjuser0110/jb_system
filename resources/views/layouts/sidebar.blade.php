@@ -10,7 +10,11 @@ $canAccessCaseModule = $user?->can('manage-case');
 
 $canAccessAdminCaseModule = $user?->can('admin-manage-case');
 
-$canManageUsers = $user?->can('manage-users');
+$canManageUsers =
+    $user?->can('manage-users') ||
+    $user?->can('manage-company-staff') ||
+    $user?->can('manage-company');
+
 
 $userModules = [
     'admin' => 'Admin',

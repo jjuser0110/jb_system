@@ -32,13 +32,21 @@ class ServiceCaseController extends Controller
             !$user->isAn('admin') &&
             !$user->isAn('superadmin')
         ) {
-            if (!$user->company_id) {
+            $companyId = $user->company_id;
+
+            // OWNER WITHOUT company_id
+            if (!$companyId && $user->isAn('owner')) {
+            
+                $companyId = Company::where('user_id', $user->id)->value('id');
+            }
+            
+            if (!$companyId) {
                 abort(403);
             }
-
-            $query->where('company_id', $user->company_id);
-
-            $companies = Company::where('id', $user->company_id)->get();
+            
+            $query->where('company_id', $companyId);
+            
+            $companies = Company::where('id', $companyId)->get();
         } else {
             $companies = Company::orderBy('company_name')->get();
         }
@@ -86,11 +94,21 @@ class ServiceCaseController extends Controller
         ) {
             $companies = Company::all();
         } else {
-            if (!$user->company_id) {
+            $companyId = $user->company_id;
+
+            // OWNER WITHOUT company_id
+            if (!$companyId && $user->isAn('owner')) {
+            
+                $companyId = Company::where('user_id', $user->id)->value('id');
+            }
+            
+            if (!$companyId) {
                 abort(403);
             }
-
-            $companies = Company::where('id', $user->company_id)->get();
+            
+            $query->where('company_id', $companyId);
+            
+            $companies = Company::where('id', $companyId)->get();
         }
 
         return view('service-cases.create', compact('companies'));

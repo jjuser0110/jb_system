@@ -38,11 +38,31 @@ class HomeController extends Controller
         // BASE QUERY
         $serviceCaseQuery = ServiceCase::query();
     
-        // IF NOT ADMIN
-        if (!$user->isAn('admin')) {
+        /**
+         * GET COMPANY ID
+         */
+        $companyId = $user->company_id;
     
-            // FILTER BY COMPANY
-            $serviceCaseQuery->where('company_id', $user->company_id);
+        // OWNER USING companies.user_id
+        if (!$companyId && $user->isAn('owner')) {
+    
+            $companyId = \App\Models\Company::where('user_id', $user->id)
+                ->value('id');
+        }
+    
+        /**
+         * FILTER NON-ADMIN
+         */
+        if (
+            !$user->isAn('admin') &&
+            !$user->isAn('superadmin')
+        ) {
+    
+            if (!$companyId) {
+                abort(403);
+            }
+    
+            $serviceCaseQuery->where('company_id', $companyId);
         }
     
         // TOTAL CASES
