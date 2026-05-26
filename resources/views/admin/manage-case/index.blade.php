@@ -62,7 +62,19 @@
                                 @elseif($case->status=='complete') bg-success
                                 @else bg-danger
                                 @endif">
-                                {{ strtoupper(str_replace('_',' ', $case->status)) }}
+
+                                @if($case->status=='pending')
+                                    Pending
+                                @elseif($case->status=='accepted')
+                                    In Progress
+                                @elseif($case->status=='service_done')
+                                    Work Done
+                                @elseif($case->status=='complete')
+                                    Completed
+                                @else
+                                    Cancelled
+                                @endif
+
                             </span>
                         </td>
 
@@ -131,7 +143,7 @@
                             <form method="POST" action="{{ route('admin.manage-case.status', $case) }}">
                                 @csrf
                                 <input type="hidden" name="status" value="cancel">
-                                <button class="btn btn-secondary btn-sm w-100 mt-1">Cancel</button>
+                                <button class="btn btn-danger btn-sm w-100 mt-1">Cancelled</button>
                             </form>
                         @endif
 

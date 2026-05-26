@@ -312,6 +312,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Service</th>
+                        <th>Created by</th>
                         <th>Status</th>
                         <th>Price</th>
                         <th>Payment</th>
@@ -331,23 +332,36 @@
                             </td>
 
                             <td>
-                                {{ $case->service->name ?? '-' }}
+                                {{ $case->description ?? '-' }}
+                            </td>
+                            <td>
+                                {{ $case->user->name ?? '-' }}
                             </td>
 
                             <td>
 
-                                @php
-                                    $statusColor = match($case->status) {
-                                        'pending' => 'warning',
-                                        'inprogress' => 'info',
-                                        'completed' => 'success',
-                                        'cancelled' => 'danger',
-                                        default => 'secondary'
-                                    };
-                                @endphp
+                            @php
+                                $statusColor = match($case->status) {
+                                    'pending' => 'warning',
+                                    'accepted' => 'info',
+                                    'service_done' => 'primary',
+                                    'complete' => 'success',
+                                    'cancel' => 'danger',
+                                    default => 'secondary'
+                                };
+
+                                $statusText = match($case->status) {
+                                    'pending' => 'Pending',
+                                    'accepted' => 'In Progress',
+                                    'service_done' => 'Work Done',
+                                    'complete' => 'Completed',
+                                    'cancel' => 'Cancelled',
+                                    default => 'Unknown'
+                                };
+                            @endphp
 
                                 <span class="badge bg-label-{{ $statusColor }}">
-                                    {{ ucfirst($case->status) }}
+                                        {{ $statusText }}
                                 </span>
 
                             </td>

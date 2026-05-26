@@ -150,7 +150,7 @@
                         'date_to' => request('date_to'),
                         'company_id' => request('company_id'),
                     ]) }}"
-                        class="btn btn-secondary">
+                        class="btn btn-warning">
 
                         Pending
                         
@@ -178,7 +178,7 @@
                         'date_to' => request('date_to'),
                         'company_id' => request('company_id'),
                     ]) }}"
-                        class="btn btn-warning text-dark">
+                        class="btn btn-primary text-white">
 
                         Work Done
                         
@@ -324,7 +324,7 @@
 
                                 @if($row->status == 'pending')
 
-                                    <span class="badge bg-secondary">
+                                    <span class="badge bg-warning">
                                         Pending
                                     </span>
 
@@ -336,7 +336,7 @@
 
                                 @elseif($row->status == 'service_done')
 
-                                    <span class="badge bg-warning text-dark">
+                                    <span class="badge bg-primary text-white">
                                         Work Done
                                     </span>
 
@@ -375,9 +375,9 @@
 
                                 @else
 
-                                    <span class="badge bg-secondary">
+                                    <span >
 
-                                        Pending
+                                        -
 
                                     </span>
 
