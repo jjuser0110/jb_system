@@ -33,24 +33,54 @@ class HomeController extends Controller
 
     public function index()
     {
-        $totalCases = ServiceCase::count();
+        $user = Auth::user();
     
-        $pendingCases = ServiceCase::where('status', 'pending')->count();
+        // BASE QUERY
+        $serviceCaseQuery = ServiceCase::query();
     
-        // accepted = in progress
-        $inProgressCases = ServiceCase::where('status', 'accepted')->count();
+        // IF NOT ADMIN
+        if (!$user->isAn('admin')) {
     
-        // complete = completed
-        $completedCases = ServiceCase::where('status', 'complete')->count();
+            // FILTER BY COMPANY
+            $serviceCaseQuery->where('company_id', $user->company_id);
+        }
     
-        $paidCases = ServiceCase::where('is_paid', 1)->count();
+        // TOTAL CASES
+        $totalCases = (clone $serviceCaseQuery)->count();
     
-        $unpaidCases = ServiceCase::where('is_paid', 0)->count();
+        // PENDING
+        $pendingCases = (clone $serviceCaseQuery)
+            ->where('status', 'pending')
+            ->count();
     
-        $totalRevenue = ServiceCase::where('is_paid', 1)
+        // IN PROGRESS
+        $inProgressCases = (clone $serviceCaseQuery)
+            ->where('status', 'accepted')
+            ->count();
+    
+        // COMPLETED
+        $completedCases = (clone $serviceCaseQuery)
+            ->where('status', 'complete')
+            ->count();
+    
+        // PAID
+        $paidCases = (clone $serviceCaseQuery)
+            ->where('is_paid', 1)
+            ->count();
+    
+        // UNPAID
+        $unpaidCases = (clone $serviceCaseQuery)
+            ->where('is_paid', 0)
+            ->count();
+    
+        // TOTAL REVENUE
+        $totalRevenue = (clone $serviceCaseQuery)
+            ->where('is_paid', 1)
             ->sum('price');
     
-        $recentCases = ServiceCase::with([
+        // RECENT CASES
+        $recentCases = (clone $serviceCaseQuery)
+            ->with([
                 'user',
                 'companyStaff'
             ])
