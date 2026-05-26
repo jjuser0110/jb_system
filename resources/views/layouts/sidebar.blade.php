@@ -8,6 +8,8 @@ $canAccessCompanyModule = $user?->can('manage-company');
 
 $canAccessCaseModule = $user?->can('manage-case');
 
+$canAccessAdminCaseModule = $user?->can('admin-manage-case');
+
 $canManageUsers = $user?->can('manage-users');
 
 $userModules = [
@@ -64,7 +66,14 @@ $userModules = [
                     </a>
                 </li>
                 @endcan
-                @can('manage-case')
+                
+        </li>
+        @endif
+        @if($canAccessAdminCaseModule)
+
+        <li class="menu-item {{ Str::contains($currentRoute, 'service-cases') || Str::contains($currentRoute, 'service.') ? 'active open' : '' }}">
+
+                @can('admin-manage-case')
                 <li class="menu-item {{ Str::contains($currentRoute, 'admin-manage-case.') ? 'active' : '' }}">
                     <a href="{{ route('admin.manage-case.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-task"></i> <div>Case Management</div>
@@ -73,44 +82,7 @@ $userModules = [
                 @endcan
         </li>
         @endif
-        <!-- {{-- ================= COMPANY MODULE ================= --}}
-        @if($canAccessCompanyModule)
-
-        <li class="menu-item {{ Str::contains($currentRoute, 'company') ? 'active open' : '' }}">
-
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                <div>Company Module</div>
-            </a>
-
-            <ul class="menu-sub">
-
-                @can('manage-company')
-                <li class="menu-item {{ Str::contains($currentRoute, 'companies') ? 'active' : '' }}">
-                    <a href="{{ route('companies.index') }}" class="menu-link">
-                        <div>Companies</div>
-                    </a>
-                </li>
-                @endcan
-
-                
-
-            </ul>
-        </li>
-        @endif -->
-
-
-        
-
-        <!-- {{-- ================= SERVICE MODULE ================= --}}
-        @can('manage-service')
-        <li class="menu-item {{ Str::contains($currentRoute, 'service') ? 'active' : '' }}">
-            <a href="{{ route('services.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-task"></i>
-                <div>Service</div>
-            </a>
-        </li>
-        @endcan -->
+       
         {{-- ================= USER MANAGEMENT ================= --}}
         @if($canManageUsers)
 

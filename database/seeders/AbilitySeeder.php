@@ -35,6 +35,9 @@ class AbilitySeeder extends Seeder
         Bouncer::allow('owner')->to('manage-case');
         Bouncer::allow('company_staff')->to('manage-case');
 
+        Bouncer::allow('admin')->to('admin-manage-case');
+        Bouncer::allow('superadmin')->to('admin-manage-case');
+
         /**
          * SERVICE MODULE
          */
