@@ -43,12 +43,42 @@ class OwnerController extends Controller
             'password' => 'required|min:6',
             'company_ids' => 'nullable|array',
             'company_ids.*' => 'exists:companies,id',
+            'new_company_names' => 'nullable|string',
         ]);
     
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
+        }
+        // CHECK NEW COMPANIES
+        if ($request->new_company_names) {
+
+            $companyNames = preg_split('/\r\n|\r|\n/', $request->new_company_names);
+
+            foreach ($companyNames as $companyName) {
+
+                $companyName = trim($companyName);
+
+                if (!$companyName) {
+                    continue;
+                }
+
+                $exists = Company::whereRaw(
+                    'LOWER(company_name) = ?',
+                    [strtolower($companyName)]
+                )->exists();
+
+                if ($exists) {
+
+                    return redirect()->back()
+                        ->withErrors([
+                            'new_company_names' =>
+                                "Company '{$companyName}' already taken by another owner"
+                        ])
+                        ->withInput();
+                }
+            }
         }
     
         $owner = User::create([
@@ -57,16 +87,35 @@ class OwnerController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-    
+        
         $owner->assign('owner');
-    
-        // Assign selected companies to owner
+        // ASSIGN EXISTING COMPANIES
         if ($request->company_ids) {
-    
+
             Company::whereIn('id', $request->company_ids)
                 ->update([
                     'user_id' => $owner->id
                 ]);
+        }
+
+        // CREATE NEW COMPANIES
+        if ($request->new_company_names) {
+
+            $companyNames = preg_split('/\r\n|\r|\n/', $request->new_company_names);
+
+            foreach ($companyNames as $companyName) {
+
+                $companyName = trim($companyName);
+
+                if (!$companyName) {
+                    continue;
+                }
+
+                Company::create([
+                    'company_name' => $companyName,
+                    'user_id' => $owner->id,
+                ]);
+            }
         }
     
         return redirect()->route('owner.index')

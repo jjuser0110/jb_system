@@ -90,6 +90,25 @@
 
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label>Or Add New Companies</label>
+
+                            <textarea
+                                name="new_company_names"
+                                class="form-control"
+                                rows="5"
+                                placeholder="One company name per line"></textarea>
+
+                            <small class="text-muted">
+                                Example:
+                                <br>ABC Sdn Bhd
+                                <br>Tech Solution
+                            </small>
+
+                            @error('new_company_names')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
 
                         {{-- PASSWORD --}}
                         <div class="col-md-7">
