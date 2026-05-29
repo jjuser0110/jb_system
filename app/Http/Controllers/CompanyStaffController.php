@@ -124,7 +124,7 @@ class CompanyStaffController extends Controller
      */
     public function edit(User $user)
     {
-        if (!$user->isAn('company_staff')) {
+        if (!$user->isA('company_staff')) {
             abort(404);
         }
 
@@ -144,7 +144,10 @@ class CompanyStaffController extends Controller
             $companies = Company::all();
         }
 
-        return view('company-staff.create', compact('user', 'companies'));
+        return view('company-staff.create', [
+            'companyStaff' => $user,
+            'companies' => $companies,
+        ]);
     }
 
     /**

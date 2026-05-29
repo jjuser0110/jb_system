@@ -72,7 +72,7 @@
                         <input type="text"
                             name="username"
                             class="form-control"
-                            value="{{ old('username', $companyStaff->user->username ?? '') }}">
+                            value="{{ old('username', $companyStaff->username ?? '') }}">
 
                     </div>
 
@@ -84,7 +84,7 @@
                         <input type="text"
                             name="name"
                             class="form-control"
-                            value="{{ old('name', $companyStaff->user->name ?? '') }}">
+                            value="{{ old('name', $companyStaff->name ?? '') }}">
 
                     </div>
 
@@ -96,7 +96,7 @@
                         <input type="email"
                             name="email"
                             class="form-control"
-                            value="{{ old('email', $companyStaff->user->email ?? '') }}">
+                            value="{{ old('email', $companyStaff->email ?? '') }}">
 
                     </div>
 
