@@ -140,7 +140,7 @@
                             </th>
 
                             <th>
-                                Role ID
+                                Owner
                             </th>
 
                             <th width="120">
@@ -172,7 +172,7 @@
                             </td>
 
                             <td>
-                                {{ $company->role->name ?? '-' }}
+                                {{ $company->owner->name ?? '-' }}
                             </td>
 
                             <td>
