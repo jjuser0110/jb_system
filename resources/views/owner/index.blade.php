@@ -15,11 +15,12 @@
                 <h5 class="card-title mb-0">Owner Listing</h5>
             </div>
 
+            @if(auth()->user()->isAn('admin') || auth()->user()->isAn('superadmin'))
             <div class="dt-action-buttons text-end pt-3 pt-md-0">
                 <div class="dt-buttons">
                     <a class="dt-button create-new btn btn-primary"
-                       href="{{ route('owner.create') }}"
-                       onclick="showLoading()">
+                    href="{{ route('owner.create') }}"
+                    onclick="showLoading()">
                         <span>
                             <i class="bx bx-plus me-sm-1"></i>
                             <span class="d-none d-sm-inline-block">Add New Record</span>
@@ -27,6 +28,7 @@
                     </a>
                 </div>
             </div>
+            @endif
         </div>
 
         <div class="card-datatable text-nowrap table-responsive">
@@ -55,16 +57,29 @@
                             </td>
 
                             <td>
+
+                            {{-- VIEW ONLY FOR OWNER --}}
+                            @if(auth()->user()->isAn('admin') || auth()->user()->isAn('superadmin'))
+
                                 <a href="{{ route('owner.edit', $row) }}"
-                                   onclick="showLoading()"
-                                   class="me-2">
+                                onclick="showLoading()"
+                                class="me-2">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
 
                                 <a style="color:red;cursor:pointer"
-                                   onclick="if(confirm('Are you sure you want to delete?')){showLoading();window.location.href='{{ route('owner.destroy',$row) }}'}">
+                                onclick="if(confirm('Are you sure you want to delete?')){showLoading();window.location.href='{{ route('owner.destroy',$row) }}'}">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
+
+                            @else
+
+                                <span class="badge bg-secondary">
+                                    View Only
+                                </span>
+
+                            @endif
+
                             </td>
                         </tr>
                     @endforeach

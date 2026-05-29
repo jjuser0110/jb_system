@@ -9,6 +9,22 @@ use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
+    private function adminOnly()
+    {
+        if (
+            !auth()->user()->isAn('admin') &&
+            !auth()->user()->isAn('superadmin')
+        ) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'error' => 'Only Admin allowed to access.'
+                ]);
+        }
+    
+        return null;
+    }
+
     public function index(Request $request)
     {
         if (auth()->user()->isAn('admin') || auth()->user()->isAn('superadmin')) {
@@ -27,11 +43,18 @@ class CompanyController extends Controller
 
     public function create()
     {
+        if ($response = $this->adminOnly()) {
+            return $response;
+        }
+    
         return view('companies.create');
     }
 
     public function store(Request $request)
     {
+        if ($response = $this->adminOnly()) {
+            return $response;
+        }
         $validator = Validator::make($request->all(), [
             'company_name' => 'required',
             'register_date' => 'nullable|date',
@@ -58,6 +81,9 @@ class CompanyController extends Controller
 
     public function edit(Company $company)
     {
+        if ($response = $this->adminOnly()) {
+            return $response;
+        }
         if ($company->user_id != auth()->id()) {
             abort(403);
         }
@@ -67,6 +93,9 @@ class CompanyController extends Controller
 
     public function update(Request $request, Company $company)
     {
+        if ($response = $this->adminOnly()) {
+            return $response;
+        }
         $validator = Validator::make($request->all(), [
             'company_name' => 'required',
             'register_date' => 'nullable|date',
