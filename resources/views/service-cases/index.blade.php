@@ -243,6 +243,8 @@
                         <th>Company</th>
                         <th>Staff</th>
                         <th>Description</th>
+                        <th>Photo</th>
+                        <th>Remark</th>
                         <th>Status</th>
                         <th>Duration</th>
                         <th>Submitted</th>
@@ -318,6 +320,65 @@
                                 {{ $row->description ?? '-' }}
 
                             </td>
+                            <td>
+                            @if($row->getMedia('photos')->count())
+
+                        <a href="#"
+                        data-bs-toggle="modal"
+                        data-bs-target="#photoModal{{ $row->id }}">
+                            View Gallery
+                        </a>
+
+                        <div class="modal fade"
+                            id="photoModal{{ $row->id }}"
+                            tabindex="-1">
+
+                            <div class="modal-dialog modal-xl">
+
+                                <div class="modal-content">
+
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Photo Gallery</h5>
+
+                                        <button type="button"
+                                                class="btn-close"
+                                                data-bs-dismiss="modal">
+                                        </button>
+                                    </div>
+
+                                    <div class="modal-body">
+
+                                        <div class="row">
+
+                                            @foreach($row->getMedia('photos') as $photo)
+
+                                                <div class="col-md-4 mb-3">
+
+                                                    <a href="{{ $photo->getUrl() }}"
+                                                    target="_blank">
+
+                                                        <img src="{{ $photo->getUrl() }}"
+                                                            class="img-fluid rounded border">
+
+                                                    </a>
+
+                                                </div>
+
+                                            @endforeach
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        @endif
+                        </td>
+                        <td>{{ $row->remark ?? '-' }}</td>
 
                             {{-- STATUS --}}
                             <td>
@@ -470,7 +531,35 @@
     </div>
 
 </div>
+<div class="modal fade"
+     id="photoModal{{ $row->id }}"
+     tabindex="-1">
 
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Uploaded Photo</h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body text-center">
+
+                <img src="{{ $row->getFirstMediaUrl('photos') }}"
+                     class="img-fluid rounded">
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 @endsection
 
 @section('page-js')
