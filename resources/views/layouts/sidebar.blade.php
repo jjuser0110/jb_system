@@ -92,6 +92,62 @@ if ($user->isAn('superadmin') || $user->isAn('admin')) {
                 @endcan
         </li>
         @endif
+
+        @if($canAccessCaseModule)
+        @if(!$user->isAn('admin') && !$user->isAn('superadmin'))
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Cases Status</span>
+        </li>
+
+        {{-- All --}}
+        <li class="menu-item {{ request('status') == '' && Str::contains($currentRoute, 'service-cases') ? 'active' : '' }}">
+            <a href="{{ route('service-cases.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-list-ul"></i>
+                <div>All Cases</div>
+            </a>
+        </li>
+
+        {{-- Owner & Staff only --}}
+       
+
+        <li class="menu-item {{ request('status') == 'pending' ? 'active' : '' }}">
+            <a href="{{ route('service-cases.index', ['status' => 'pending']) }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-time"></i>
+                <div>Pending</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request('status') == 'accepted' ? 'active' : '' }}">
+            <a href="{{ route('service-cases.index', ['status' => 'accepted']) }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-loader-circle"></i>
+                <div>In Progress</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request('status') == 'service_done' ? 'active' : '' }}">
+            <a href="{{ route('service-cases.index', ['status' => 'service_done']) }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-check-circle"></i>
+                <div>Work Done</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request('status') == 'complete' ? 'active' : '' }}">
+            <a href="{{ route('service-cases.index', ['status' => 'complete']) }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-badge-check"></i>
+                <div>Completed</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request('status') == 'cancel' ? 'active' : '' }}">
+            <a href="{{ route('service-cases.index', ['status' => 'cancel']) }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-x-circle"></i>
+                <div>Cancelled</div>
+            </a>
+        </li>
+
+        @endif
+
+        @endif
        
         {{-- ================= USER MANAGEMENT ================= --}}
         @if($canManageUsers)

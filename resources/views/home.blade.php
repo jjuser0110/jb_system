@@ -346,6 +346,7 @@
 
                     <tr>
                         <th>ID</th>
+                        <th>Company</th>
                         <th>Service</th>
                         <th>Created by</th>
                         <th>Status</th>
@@ -364,6 +365,9 @@
 
                             <td>
                                 #{{ $case->id }}
+                            </td>
+                            <td>
+                                {{ $case->company->company_name ?? '-' }}
                             </td>
 
                             <td>

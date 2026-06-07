@@ -36,122 +36,127 @@ class HomeController extends Controller
     {
         $user = Auth::user();
     
-        // BASE QUERY
+        // Base query
         $serviceCaseQuery = ServiceCase::query();
+    
         $ownerCompanies = collect();
         $selectedCompanyId = request('company_id');
+    
+        // Restrict data for non-admin users
         if (
             !$user->isAn('admin') &&
             !$user->isAn('superadmin')
         ) {
-        
-            // STAFF
-            if ($user->company_id) {
-        
-                $serviceCaseQuery->where(
-                    'company_id',
-                    $user->company_id
-                );
-        
-            }
+    
             // OWNER
-            elseif ($user->isAn('owner')) {
-        
+            if ($user->isAn('owner')) {
+    
                 $ownerCompanies = Company::where('user_id', $user->id)
                     ->orderBy('company_name')
                     ->get();
-        
+    
                 $allowedCompanyIds = $ownerCompanies
                     ->pluck('id')
                     ->toArray();
-        
+    
                 if (empty($allowedCompanyIds)) {
                     abort(403);
                 }
-        
-                if ($selectedCompanyId) {
-        
+    
+                // Filter selected company
+                if (!empty($selectedCompanyId)) {
+    
                     if (!in_array($selectedCompanyId, $allowedCompanyIds)) {
                         abort(403);
                     }
-        
+    
                     $serviceCaseQuery->where(
                         'company_id',
                         $selectedCompanyId
                     );
-        
+    
                 } else {
-        
+    
                     $serviceCaseQuery->whereIn(
                         'company_id',
                         $allowedCompanyIds
                     );
-        
+    
                 }
-        
-            } else {
-        
+    
+            }
+            // COMPANY STAFF
+            elseif ($user->company_id) {
+    
+                $serviceCaseQuery->where(
+                    'company_id',
+                    $user->company_id
+                );
+    
+            }
+            // Unknown role
+            else {
+    
                 abort(403);
-        
+    
             }
         }
     
-        // TOTAL CASES
+        // Dashboard Statistics
+    
         $totalCases = (clone $serviceCaseQuery)->count();
     
-        // PENDING
         $pendingCases = (clone $serviceCaseQuery)
             ->where('status', 'pending')
             ->count();
     
-        // IN PROGRESS
         $inProgressCases = (clone $serviceCaseQuery)
-            ->where('status', 'accepted')
+            ->whereIn('status', [
+                'accepted',
+                'service_done'
+            ])
             ->count();
     
-        // COMPLETED
         $completedCases = (clone $serviceCaseQuery)
             ->where('status', 'complete')
             ->count();
     
-        // PAID
         $paidCases = (clone $serviceCaseQuery)
             ->where('is_paid', 1)
             ->count();
     
-        // UNPAID
         $unpaidCases = (clone $serviceCaseQuery)
             ->where('is_paid', 0)
             ->count();
     
-        // TOTAL REVENUE
         $totalRevenue = (clone $serviceCaseQuery)
             ->where('is_paid', 1)
             ->sum('price');
     
-        // RECENT CASES
+        // Recent Cases
         $recentCases = (clone $serviceCaseQuery)
             ->with([
                 'user',
+                'company',
                 'companyStaff'
             ])
             ->latest()
             ->take(10)
             ->get();
     
-            return view('home', compact(
-                'totalCases',
-                'pendingCases',
-                'inProgressCases',
-                'completedCases',
-                'paidCases',
-                'unpaidCases',
-                'totalRevenue',
-                'recentCases',
-                'ownerCompanies'
-            ));
+        return view('home', compact(
+            'totalCases',
+            'pendingCases',
+            'inProgressCases',
+            'completedCases',
+            'paidCases',
+            'unpaidCases',
+            'totalRevenue',
+            'recentCases',
+            'ownerCompanies',
+            'selectedCompanyId'
+        ));
     }
-    
     public function change_password(Request $request){
         $user = Auth::user();
 

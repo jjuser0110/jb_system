@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+@php
+    $user = auth()->user();
+@endphp
 @section('content')
 
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -139,7 +141,7 @@
                     </div>
 
                 </div>
-
+                @if($user->isAn('admin') && $user->isAn('superadmin'))
                 {{-- STATUS BUTTONS --}}
                 <div class="mt-4 d-flex flex-wrap gap-2">
 
@@ -224,7 +226,7 @@
 
                     </a>
                 </div>
-
+            @endif
             </form>
 
         </div>
