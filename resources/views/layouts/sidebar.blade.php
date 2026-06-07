@@ -16,10 +16,16 @@ $canManageUsers =
     $user?->can('manage-company');
 
 
-$userModules = [
-    'admin' => 'Admin',
-    'owner' => 'Owner',
-];
+
+$userModules = [];
+
+if ($user->isAn('superadmin') || $user->isAn('admin')) {
+    $userModules = [
+        'admin' => 'Admin',
+        'owner' => 'Owner',
+    ];
+}
+
 @endphp
 
 
@@ -102,21 +108,24 @@ $userModules = [
         <li class="menu-item {{ $isUserMenuActive ? 'active open' : '' }}">
 
           
+                {{-- Admin & Superadmin only --}}
                 @foreach($userModules as $route => $label)
-
                 <li class="menu-item {{ Str::contains($currentRoute, $route) ? 'active' : '' }}">
                     <a href="{{ route($route . '.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-user"></i><div>{{ $label }}</div>
+                        <i class="menu-icon tf-icons bx bx-user"></i>
+                        <div>{{ $label }}</div>
                     </a>
                 </li>
-
                 @endforeach
                 @can('manage-company')
+                @if($user->isAn('superadmin') || $user->isAn('admin'))
                 <li class="menu-item {{ Str::contains($currentRoute, 'companies') ? 'active' : '' }}">
                     <a href="{{ route('companies.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-user"></i><div>Companies</div>
+                        <i class="menu-icon tf-icons bx bx-user"></i>
+                        <div>Companies</div>
                     </a>
                 </li>
+                @endif
                 @endcan
 
                 @can('manage-company-staff')

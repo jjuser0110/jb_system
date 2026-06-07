@@ -27,8 +27,10 @@ class AdminServiceCaseController extends Controller
 
         $query = ServiceCase::with(['user.company']);
 
-        if ($request->status) {
-            $query->where('status', $request->status);
+        $status = $request->status ?? 'pending';
+        
+        if ($status !== 'all') {
+            $query->where('status', $status);
         }
 
         $serviceCases = $query->latest()->paginate(10);
@@ -46,6 +48,8 @@ class AdminServiceCaseController extends Controller
         $request->validate([
             'status' => 'required|in:pending,accepted,service_done,complete,cancel',
             'price' => 'nullable|numeric|min:0',
+            'receipt' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'remark' => 'nullable|string',
         ]);
     
         // 🚨 BLOCK completing if not paid
@@ -58,6 +62,20 @@ class AdminServiceCaseController extends Controller
         // START WORK
         if ($request->status === 'accepted') {
             $serviceCase->accepted_at = now();
+        }
+        if ($request->status === 'service_done') {
+
+            if ($request->hasFile('receipt')) {
+        
+                if ($serviceCase->receipt) {
+                    Storage::disk('public')->delete($serviceCase->receipt);
+                }
+        
+                $serviceCase->receipt = $request->file('receipt')
+                    ->store('service_done', 'public');
+            }
+        
+            $serviceCase->remark = $request->remark;
         }
     
         // COMPLETE WORK (ONLY AFTER PAYMENT)
@@ -79,20 +97,10 @@ class AdminServiceCaseController extends Controller
     
         $request->validate([
             'price' => 'required|numeric|min:0',
-            'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'remark' => 'nullable|string',
         ]);
-    
-        if ($serviceCase->receipt) {
-            Storage::disk('public')->delete($serviceCase->receipt);
-        }
-    
-        $path = $request->file('receipt')->store('receipts', 'public');
     
         $serviceCase->update([
             'price' => $request->price,
-            'receipt' => $path,
-            'remark' => $request->remark,
             'is_paid' => true,
             'status' => 'complete',
             'completed_at' => now(),

@@ -8,9 +8,6 @@
 
     {{-- FILTER --}}
     <div class="mb-3 d-flex gap-2 flex-wrap">
-
-        <a href="{{ route('admin.manage-case.index') }}" class="btn btn-secondary">ALL</a>
-
         <a href="{{ route('admin.manage-case.index', ['status' => 'pending']) }}" class="btn btn-warning">Pending</a>
 
         <a href="{{ route('admin.manage-case.index', ['status' => 'accepted']) }}" class="btn btn-info">In Progress</a>
@@ -20,6 +17,8 @@
         <a href="{{ route('admin.manage-case.index', ['status' => 'complete']) }}" class="btn btn-success">Completed</a>
 
         <a href="{{ route('admin.manage-case.index', ['status' => 'cancel']) }}" class="btn btn-danger">Cancelled</a>
+
+        <a href="{{ route('admin.manage-case.index', ['status' => 'all']) }}" class="btn btn-secondary">ALL</a>
 
     </div>
 
@@ -180,11 +179,11 @@
 
                         {{-- MARK DONE --}}
                         @if($case->status == 'accepted')
-                            <form method="POST" action="{{ route('admin.manage-case.status', $case) }}">
-                                @csrf
-                                <input type="hidden" name="status" value="service_done">
-                                <button class="btn btn-primary btn-sm w-100 mb-1">Mark Work Done</button>
-                            </form>
+                            <button class="btn btn-primary btn-sm w-100 mb-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#doneModal{{ $case->id }}">
+                                Mark Work Done
+                            </button>
                         @endif
 
                         {{-- PAYMENT POPUP (NOW CONTAINS PRICE + REMARK + RECEIPT) --}}
@@ -212,7 +211,53 @@
 
                         </td>
                     </tr>
+                    {{-- WORK DONE MODAL --}}
+                    <div class="modal fade" id="doneModal{{ $case->id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
 
+                        <form method="POST"
+                            action="{{ route('admin.manage-case.status', $case) }}"
+                            enctype="multipart/form-data">
+
+                            @csrf
+
+                            <input type="hidden" name="status" value="service_done">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title">Work Done</h5>
+                            </div>
+
+                            <div class="modal-body">
+
+                                <div class="mb-3">
+                                    <label>Photo</label>
+                                    <input type="file"
+                                        name="receipt"
+                                        class="form-control"
+                                        required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label>Remark</label>
+                                    <textarea name="remark"
+                                            class="form-control"
+                                            required></textarea>
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button class="btn btn-primary">
+                                    Save Work Done
+                                </button>
+                            </div>
+
+                        </form>
+
+                        </div>
+                        </div>
+                    </div>
                     {{-- PAYMENT MODAL --}}
                     <div class="modal fade" id="paymentModal{{ $case->id }}" tabindex="-1">
                     <div class="modal-dialog">
@@ -230,7 +275,6 @@
                                 </div>
 
                                 <div class="modal-body">
-
                                     {{-- PRICE --}}
                                     <div class="mb-3">
                                         <label>Price (RM)</label>
@@ -240,22 +284,6 @@
                                             class="form-control"
                                             required>
                                     </div>
-
-                                    {{-- RECEIPT --}}
-                                    <div class="mb-3">
-                                        <label>Receipt / Photo</label>
-                                        <input type="file"
-                                            name="receipt"
-                                            class="form-control"
-                                            required>
-                                    </div>
-
-                                    {{-- REMARK --}}
-                                    <div class="mb-3">
-                                        <label>Remark</label>
-                                        <textarea name="remark" class="form-control"></textarea>
-                                    </div>
-
                                 </div>
 
                                 <div class="modal-footer">

@@ -32,29 +32,46 @@ class ServiceCaseController extends Controller
             !$user->isAn('admin') &&
             !$user->isAn('superadmin')
         ) {
-            $companyId = $user->company_id;
-
-            // OWNER WITHOUT company_id
-            if (!$companyId && $user->isAn('owner')) {
-            
-                $companyId = Company::where('user_id', $user->id)->value('id');
+        
+            // STAFF
+            if ($user->company_id) {
+        
+                $allowedCompanyIds = [$user->company_id];
+        
             }
-            
-            if (!$companyId) {
+            // OWNER
+            elseif ($user->isAn('owner')) {
+        
+                $allowedCompanyIds = Company::where('user_id', $user->id)
+                    ->pluck('id')
+                    ->toArray();
+        
+            } else {
+        
+                abort(403);
+        
+            }
+        
+            if (empty($allowedCompanyIds)) {
                 abort(403);
             }
-            
-            $query->where('company_id', $companyId);
-            
-            $companies = Company::where('id', $companyId)->get();
-        } else {
+        
+            $query->whereIn('company_id', $allowedCompanyIds);
+        
+            $companies = Company::whereIn('id', $allowedCompanyIds)
+                ->orderBy('company_name')
+                ->get();
+        }
+        else {
+        
             $companies = Company::orderBy('company_name')->get();
+        
         }
 
         /**
          * FILTER: COMPANY
          */
-        if ($request->company_id) {
+        if ($request->filled('company_id')) {
             $query->where('company_id', $request->company_id);
         }
 
@@ -87,62 +104,98 @@ class ServiceCaseController extends Controller
     public function create()
     {
         $user = auth()->user();
-
-        if (
-            $user->isAn('admin') ||
-            $user->isAn('superadmin')
-        ) {
+    
+        if ($user->isAn('admin') || $user->isAn('superadmin')) {
+    
             $companies = Company::all();
+    
         } else {
+    
+            // Staff normally has company_id
             $companyId = $user->company_id;
+    
+            // Owner may not have company_id, find company by user_id
+            if ($user->isAn('admin') || $user->isAn('superadmin')) {
 
-            // OWNER WITHOUT company_id
-            if (!$companyId && $user->isAn('owner')) {
+                $companies = Company::all();
             
-                $companyId = Company::where('user_id', $user->id)->value('id');
+            } elseif ($user->isAn('owner')) {
+            
+                $companies = Company::where('user_id', $user->id)
+                    ->orderBy('company_name')
+                    ->get();
+            
+                if ($companies->isEmpty()) {
+                    abort(403, 'No company assigned.');
+                }
+            
+            } else {
+            
+                $companyId = $user->company_id;
+            
+                if (!$companyId) {
+                    abort(403, 'No company assigned.');
+                }
+            
+                $companies = Company::where('id', $companyId)->get();
             }
-            
-            if (!$companyId) {
-                abort(403);
-            }
-            
-            $query->where('company_id', $companyId);
-            
-            $companies = Company::where('id', $companyId)->get();
         }
-
+    
         return view('service-cases.create', compact('companies'));
     }
-
     /**
      * STORE
      */
     public function store(Request $request)
     {
         $request->validate([
+            'company_id' => 'required|exists:companies,id',
             'submit_datetime' => 'required',
             'description' => 'required|string',
-            'photo' => 'nullable|image|max:5120',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|max:5120',
         ]);
-
         $user = auth()->user();
 
-        if (!$user->company_id) {
-            abort(403);
+        if (
+            !$user->isAn('admin') &&
+            !$user->isAn('superadmin')
+        ) {
+        
+            if ($user->isAn('owner')) {
+        
+                $allowed = Company::where('user_id', $user->id)
+                    ->where('id', $request->company_id)
+                    ->exists();
+        
+                abort_unless($allowed, 403);
+        
+            } else {
+        
+                abort_unless(
+                    $user->company_id == $request->company_id,
+                    403
+                );
+        
+            }
         }
 
         $serviceCase = ServiceCase::create([
             'user_id' => $user->id,
-            'company_id' => $user->company_id,
+            'company_id' => $request->company_id,
             'description' => $request->description,
             'submit_datetime' => $request->submit_datetime,
             'status' => 'pending',
         ]);
 
-        if ($request->hasFile('photo')) {
-            $serviceCase
-                ->addMediaFromRequest('photo')
-                ->toMediaCollection('photos');
+        if ($request->hasFile('photos')) {
+
+            foreach ($request->file('photos') as $photo) {
+        
+                $serviceCase
+                    ->addMedia($photo)
+                    ->toMediaCollection('photos');
+            }
         }
 
         return redirect()
@@ -161,14 +214,44 @@ class ServiceCaseController extends Controller
             !$user->isAn('admin') &&
             !$user->isAn('superadmin')
         ) {
-            if ($serviceCase->company_id !== $user->company_id) {
+        
+            if ($user->company_id) {
+        
+                $allowedCompanyIds = [$user->company_id];
+        
+            } elseif ($user->isAn('owner')) {
+        
+                $allowedCompanyIds = Company::where('user_id', $user->id)
+                    ->pluck('id')
+                    ->toArray();
+        
+            } else {
+        
                 abort(403);
+        
             }
+        
+            abort_unless(
+                in_array($serviceCase->company_id, $allowedCompanyIds),
+                403
+            );
         }
 
-        $companies = $user->isAn('admin') || $user->isAn('superadmin')
-            ? Company::all()
-            : Company::where('id', $user->company_id)->get();
+        if ($user->isAn('admin') || $user->isAn('superadmin')) {
+
+            $companies = Company::all();
+        
+        } elseif ($user->isAn('owner')) {
+        
+            $companies = Company::where('user_id', $user->id)
+                ->orderBy('company_name')
+                ->get();
+        
+        } else {
+        
+            $companies = Company::where('id', $user->company_id)
+                ->get();
+        }
 
         return view('service-cases.create', compact(
             'serviceCase',
@@ -184,8 +267,9 @@ class ServiceCaseController extends Controller
         $request->validate([
             'submit_datetime' => 'required',
             'description' => 'required|string',
-            'status' => 'required|in:pending,accepted,service_done,complete,cancel,reject',
-            'photo' => 'nullable|image|max:5120',
+            'status' => 'nullable|in:pending,accepted,service_done,complete,cancel,reject',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|max:5120',
         ]);
 
         $user = auth()->user();
@@ -194,26 +278,43 @@ class ServiceCaseController extends Controller
             !$user->isAn('admin') &&
             !$user->isAn('superadmin')
         ) {
-            if ($serviceCase->company_id !== $user->company_id) {
+        
+            if ($user->company_id) {
+        
+                $allowedCompanyIds = [$user->company_id];
+        
+            } elseif ($user->isAn('owner')) {
+        
+                $allowedCompanyIds = Company::where('user_id', $user->id)
+                    ->pluck('id')
+                    ->toArray();
+        
+            } else {
+        
                 abort(403);
+        
             }
+        
+            abort_unless(
+                in_array($serviceCase->company_id, $allowedCompanyIds),
+                403
+            );
         }
 
         $serviceCase->update([
             'description' => $request->description,
             'submit_datetime' => $request->submit_datetime,
-            'status' => $request->status,
-            'completed_at' => $request->status === 'complete'
-                ? now()
-                : null,
+            'status' => $request->status ?? $serviceCase->status,
         ]);
 
-        if ($request->hasFile('photo')) {
-            $serviceCase->clearMediaCollection('photos');
+        if ($request->hasFile('photos')) {
 
-            $serviceCase
-                ->addMediaFromRequest('photo')
-                ->toMediaCollection('photos');
+            foreach ($request->file('photos') as $photo) {
+        
+                $serviceCase
+                    ->addMedia($photo)
+                    ->toMediaCollection('photos');
+            }
         }
 
         return redirect()
@@ -232,9 +333,27 @@ class ServiceCaseController extends Controller
             !$user->isAn('admin') &&
             !$user->isAn('superadmin')
         ) {
-            if ($serviceCase->company_id !== $user->company_id) {
+        
+            if ($user->company_id) {
+        
+                $allowedCompanyIds = [$user->company_id];
+        
+            } elseif ($user->isAn('owner')) {
+        
+                $allowedCompanyIds = Company::where('user_id', $user->id)
+                    ->pluck('id')
+                    ->toArray();
+        
+            } else {
+        
                 abort(403);
+        
             }
+        
+            abort_unless(
+                in_array($serviceCase->company_id, $allowedCompanyIds),
+                403
+            );
         }
 
         $serviceCase->clearMediaCollection('photos');
@@ -371,7 +490,7 @@ class ServiceCaseController extends Controller
     {
         $query = ServiceCase::with(['user.company']);
 
-        if ($request->company_id) {
+        if ($request->filled('company_id')) {
             $query->where('company_id', $request->company_id);
         }
 

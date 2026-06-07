@@ -103,21 +103,77 @@
                     <label class="form-label">Upload Photo</label>
 
                     <input type="file"
-                           name="photo"
-                           accept="image/*"
-                           capture="environment"
-                           class="form-control">
+                            name="photos[]"
+                            multiple
+                            accept="image/*"
+                            class="form-control">
 
-                    @if(isset($serviceCase) && $serviceCase->getFirstMediaUrl('photos'))
+                            @if(isset($serviceCase) && $serviceCase->getMedia('photos')->count())
 
-                        <div class="mt-3">
+                            <div class="mt-3">
 
-                            <img src="{{ $serviceCase->getFirstMediaUrl('photos') }}"
-                                 style="width:120px; border-radius:8px; object-fit:cover;">
+                                <label class="form-label fw-bold">
+                                    Uploaded Photos
+                                </label>
 
-                        </div>
+                                <ul>
 
-                    @endif
+                                    @foreach($serviceCase->getMedia('photos') as $photo)
+
+                                        <li>
+
+                                            <a href="#"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#photoModal{{ $photo->id }}">
+
+                                                {{ $photo->file_name }}
+
+                                            </a>
+
+                                        </li>
+
+                                        <!-- Modal -->
+                                        <div class="modal fade"
+                                            id="photoModal{{ $photo->id }}"
+                                            tabindex="-1">
+
+                                            <div class="modal-dialog modal-dialog-centered modal-xl">
+
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+
+                                                        <h5 class="modal-title">
+                                                            {{ $photo->file_name }}
+                                                        </h5>
+
+                                                        <button type="button"
+                                                                class="btn-close"
+                                                                data-bs-dismiss="modal">
+                                                        </button>
+
+                                                    </div>
+
+                                                    <div class="modal-body text-center">
+
+                                                        <img src="{{ $photo->getUrl() }}"
+                                                            class="img-fluid rounded">
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    @endforeach
+
+                                </ul>
+
+                            </div>
+
+                            @endif
 
                 </div>
 

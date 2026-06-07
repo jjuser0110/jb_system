@@ -11,6 +11,7 @@ use App\Models\Extra;
 use App\Models\Expense;
 use App\Models\DcWorkerSalary;
 use App\Models\ServiceCase;
+use App\Models\Company;
 use Bouncer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -37,32 +38,62 @@ class HomeController extends Controller
     
         // BASE QUERY
         $serviceCaseQuery = ServiceCase::query();
-    
-        /**
-         * GET COMPANY ID
-         */
-        $companyId = $user->company_id;
-    
-        // OWNER USING companies.user_id
-        if (!$companyId && $user->isAn('owner')) {
-    
-            $companyId = \App\Models\Company::where('user_id', $user->id)
-                ->value('id');
-        }
-    
-        /**
-         * FILTER NON-ADMIN
-         */
+        $ownerCompanies = collect();
+        $selectedCompanyId = request('company_id');
         if (
             !$user->isAn('admin') &&
             !$user->isAn('superadmin')
         ) {
-    
-            if (!$companyId) {
-                abort(403);
+        
+            // STAFF
+            if ($user->company_id) {
+        
+                $serviceCaseQuery->where(
+                    'company_id',
+                    $user->company_id
+                );
+        
             }
-    
-            $serviceCaseQuery->where('company_id', $companyId);
+            // OWNER
+            elseif ($user->isAn('owner')) {
+        
+                $ownerCompanies = Company::where('user_id', $user->id)
+                    ->orderBy('company_name')
+                    ->get();
+        
+                $allowedCompanyIds = $ownerCompanies
+                    ->pluck('id')
+                    ->toArray();
+        
+                if (empty($allowedCompanyIds)) {
+                    abort(403);
+                }
+        
+                if ($selectedCompanyId) {
+        
+                    if (!in_array($selectedCompanyId, $allowedCompanyIds)) {
+                        abort(403);
+                    }
+        
+                    $serviceCaseQuery->where(
+                        'company_id',
+                        $selectedCompanyId
+                    );
+        
+                } else {
+        
+                    $serviceCaseQuery->whereIn(
+                        'company_id',
+                        $allowedCompanyIds
+                    );
+        
+                }
+        
+            } else {
+        
+                abort(403);
+        
+            }
         }
     
         // TOTAL CASES
@@ -108,16 +139,17 @@ class HomeController extends Controller
             ->take(10)
             ->get();
     
-        return view('home', compact(
-            'totalCases',
-            'pendingCases',
-            'inProgressCases',
-            'completedCases',
-            'paidCases',
-            'unpaidCases',
-            'totalRevenue',
-            'recentCases'
-        ));
+            return view('home', compact(
+                'totalCases',
+                'pendingCases',
+                'inProgressCases',
+                'completedCases',
+                'paidCases',
+                'unpaidCases',
+                'totalRevenue',
+                'recentCases',
+                'ownerCompanies'
+            ));
     }
     
     public function change_password(Request $request){

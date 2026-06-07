@@ -7,7 +7,42 @@
     <h4 class="py-3 breadcrumb-wrapper mb-4">
         <span class="text-muted fw-light">Dashboard</span>
     </h4>
+    @if(auth()->user()->isAn('owner') && isset($ownerCompanies))
 
+    <form method="GET" class="mb-4">
+
+        <div class="row">
+
+            <div class="col-md-4">
+
+                <select name="company_id"
+                        class="form-select"
+                        onchange="this.form.submit()">
+
+                    <option value="">
+                        All My Companies
+                    </option>
+
+                    @foreach($ownerCompanies as $company)
+
+                        <option value="{{ $company->id }}"
+                            {{ request('company_id') == $company->id ? 'selected' : '' }}>
+
+                            {{ $company->company_name }}
+
+                        </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </form>
+
+@endif
     <div class="row">
 
         {{-- TOTAL CASES --}}
