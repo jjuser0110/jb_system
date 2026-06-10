@@ -10,6 +10,7 @@ Route::prefix('service-cases')->as('service-cases.')->group(function () {
     Route::post('/store', [ServiceCaseController::class, 'store'])->name('store');
     Route::get('/edit/{serviceCase}', [ServiceCaseController::class, 'edit'])->name('edit');
     Route::put('/update/{serviceCase}', [ServiceCaseController::class, 'update'])->name('update');
+    Route::get('/show/{serviceCase}', [ServiceCaseController::class, 'show'])->name('show');
     Route::delete('/destroy/{serviceCase}', [ServiceCaseController::class, 'destroy'])->name('destroy');
     Route::get('/pending', [ServiceCaseController::class, 'pending'])->name('pending');
     Route::get('/accepted', [ServiceCaseController::class, 'accepted'])->name('accepted');

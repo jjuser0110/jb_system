@@ -202,7 +202,13 @@ class ServiceCaseController extends Controller
             ->route('service-cases.index')
             ->with('success', 'Case created successfully');
     }
-
+        /**
+     * SHOW
+     */
+    public function show(ServiceCase $serviceCase)
+    {
+        return view('service-cases.show', compact('serviceCase'));
+    }
     /**
      * EDIT
      */

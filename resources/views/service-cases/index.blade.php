@@ -501,6 +501,15 @@
                             {{-- ACTION --}}
                             <td>
 
+                                {{-- VIEW --}}
+                                <a href="{{ route('service-cases.show', $row) }}"
+                                    class="me-2 text-info"
+                                    title="View">
+
+                                    <i class="fa-solid fa-eye"></i>
+
+                                </a>
+
                                 {{-- EDIT --}}
                                 <a href="{{ route('service-cases.edit', $row) }}"
                                     onclick="showLoading()"
