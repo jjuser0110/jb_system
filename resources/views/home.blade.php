@@ -1,7 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    .dashboard-card {
+        cursor: pointer;
+        transition: all .2s ease;
+    }
 
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+</style>
 <div class="container-xxl flex-grow-1 container-p-y">
 
     <h4 class="py-3 breadcrumb-wrapper mb-4">
@@ -48,7 +58,8 @@
         {{-- TOTAL CASES --}}
         <div class="col-xl-3 col-sm-6 col-12 mb-4">
 
-            <div class="card">
+            <div class="card dashboard-card"
+                onclick="window.location='{{ route('service-cases.index') }}'">
 
                 <div class="card-body">
 
@@ -89,7 +100,8 @@
         {{-- PENDING --}}
         <div class="col-xl-3 col-sm-6 col-12 mb-4">
 
-            <div class="card">
+            <div class="card dashboard-card"
+                onclick="window.location='{{ route('service-cases.index', ['status' => 'pending']) }}'">
 
                 <div class="card-body">
 
@@ -130,7 +142,8 @@
         {{-- IN PROGRESS --}}
         <div class="col-xl-3 col-sm-6 col-12 mb-4">
 
-            <div class="card">
+            <div class="card dashboard-card"
+                onclick="window.location='{{ route('service-cases.index', ['status' => 'accepted']) }}'">
 
                 <div class="card-body">
 
@@ -171,7 +184,8 @@
         {{-- COMPLETED --}}
         <div class="col-xl-3 col-sm-6 col-12 mb-4">
 
-            <div class="card">
+            <div class="card dashboard-card"
+                onclick="window.location='{{ route('service-cases.index', ['status' => 'complete']) }}'">
 
                 <div class="card-body">
 
@@ -210,14 +224,13 @@
         </div>
 
     </div>
-
-    {{-- SECOND ROW --}}
     <div class="row">
 
         {{-- REVENUE --}}
         <div class="col-lg-4 col-md-6 mb-4">
 
-            <div class="card">
+            <div class="card dashboard-card"
+                onclick="window.location='{{ route('service-cases.index', ['is_paid' => 1]) }}'">
 
                 <div class="card-body">
 
@@ -254,7 +267,8 @@
         {{-- PAID --}}
         <div class="col-lg-4 col-md-6 mb-4">
 
-            <div class="card">
+            <div class="card dashboard-card"
+                onclick="window.location='{{ route('service-cases.index', ['is_paid' => 1]) }}'">
 
                 <div class="card-body">
 
@@ -291,7 +305,8 @@
         {{-- UNPAID --}}
         <div class="col-lg-4 col-md-6 mb-4">
 
-            <div class="card">
+            <div class="card dashboard-card"
+                onclick="window.location='{{ route('service-cases.index', ['is_paid' => 0]) }}'">
 
                 <div class="card-body">
 
@@ -325,7 +340,7 @@
 
         </div>
 
-    </div>
+        </div>
 
     {{-- RECENT CASES --}}
     <div class="card">

@@ -510,22 +510,42 @@
 
                                 </a>
 
-                                {{-- EDIT --}}
-                                <a href="{{ route('service-cases.edit', $row) }}"
-                                    onclick="showLoading()"
-                                    class="me-2">
+                                @if($row->status == 'pending')
 
-                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    {{-- EDIT --}}
+                                    <a href="{{ route('service-cases.edit', $row) }}"
+                                        onclick="showLoading()"
+                                        class="me-2"
+                                        title="Edit">
 
-                                </a>
+                                        <i class="fa-solid fa-pen-to-square"></i>
 
-                                {{-- DELETE --}}
-                                <a style="color:red;cursor:pointer"
-                                    onclick="if(confirm('Are you sure you want to delete?')){showLoading();window.location.href='{{ route('service-cases.destroy',$row) }}'}">
+                                    </a>
 
-                                    <i class="fa-solid fa-trash"></i>
+                                    {{-- DELETE --}}
+                                    <a style="color:red;cursor:pointer"
+                                        title="Delete"
+                                        onclick="if(confirm('Are you sure you want to delete?')){showLoading();window.location.href='{{ route('service-cases.destroy',$row) }}'}">
 
-                                </a>
+                                        <i class="fa-solid fa-trash"></i>
+
+                                    </a>
+
+                                @else
+
+                                    {{-- DISABLED EDIT --}}
+                                    <span class="me-2 text-muted"
+                                        title="Only Pending cases can be edited">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </span>
+
+                                    {{-- DISABLED DELETE --}}
+                                    <span class="text-muted"
+                                        title="Only Pending cases can be deleted">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </span>
+
+                                @endif
 
                             </td>
 
