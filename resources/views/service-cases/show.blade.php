@@ -33,7 +33,12 @@
                     <table class="table table-borderless">
 
                         <tr>
-                            <th width="180">Company</th>
+                            <th width="180">Order Number</th>
+                            <td>{{ $serviceCase->order_number ?? '-' }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Company</th>
                             <td>{{ $serviceCase->company->company_name ?? '-' }}</td>
                         </tr>
 
@@ -44,7 +49,7 @@
 
                         <tr>
                             <th>Status</th>
-                            <td>{{ ucfirst(str_replace('_',' ',$serviceCase->status)) }}</td>
+                            <td>{{ ucfirst(str_replace('_', ' ', $serviceCase->status)) }}</td>
                         </tr>
 
                         <tr>
@@ -54,7 +59,7 @@
 
                         <tr>
                             <th>Price</th>
-                            <td>RM {{ number_format($serviceCase->price,2) }}</td>
+                            <td>RM {{ number_format($serviceCase->price ?? 0, 2) }}</td>
                         </tr>
 
                         <tr>
@@ -93,6 +98,13 @@
                             <th width="180">Submitted</th>
                             <td>
                                 {{ optional($serviceCase->submit_datetime)->format('d/m/Y h:i A') }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Accepted</th>
+                            <td>
+                                {{ $serviceCase->accepted_at ? \Carbon\Carbon::parse($serviceCase->accepted_at)->format('d/m/Y h:i A') : '-' }}
                             </td>
                         </tr>
 
@@ -152,41 +164,42 @@
         {{-- PHOTOS --}}
         @if($serviceCase->getMedia('photos')->count())
 
-        <div class="col-md-12">
+            <div class="col-md-12">
 
-            <div class="card">
+                <div class="card">
 
-                <div class="card-header">
-                    <h5 class="mb-0">Photo Gallery</h5>
-                </div>
+                    <div class="card-header">
+                        <h5 class="mb-0">Photo Gallery</h5>
+                    </div>
 
-                <div class="card-body">
+                    <div class="card-body">
 
-                    <div class="row">
+                        <div class="row">
 
-                        @foreach($serviceCase->getMedia('photos') as $photo)
+                            @foreach($serviceCase->getMedia('photos') as $photo)
 
-                            <div class="col-md-3 mb-3">
+                                <div class="col-md-3 mb-3">
 
-                                <a href="{{ $photo->getUrl() }}"
-                                    target="_blank">
+                                    <a href="{{ $photo->getUrl() }}"
+                                        target="_blank">
 
-                                    <img src="{{ $photo->getUrl() }}"
-                                        class="img-fluid rounded border">
+                                        <img src="{{ $photo->getUrl() }}"
+                                            class="img-fluid rounded border"
+                                            alt="Service Case Photo">
 
-                                </a>
+                                    </a>
 
-                            </div>
+                                </div>
 
-                        @endforeach
+                            @endforeach
+
+                        </div>
 
                     </div>
 
                 </div>
 
             </div>
-
-        </div>
 
         @endif
 

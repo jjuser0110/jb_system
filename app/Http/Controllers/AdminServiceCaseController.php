@@ -61,6 +61,22 @@ class AdminServiceCaseController extends Controller
     
         // START WORK
         if ($request->status === 'accepted') {
+
+            if (!$serviceCase->order_number) {
+        
+                $prefix = 'SO' . now()->format('ym');
+        
+                $sequence = ServiceCase::where('order_number', 'like', $prefix . '%')
+                    ->count() + 1;
+        
+                $serviceCase->order_number = $prefix . str_pad(
+                    $sequence,
+                    3,
+                    '0',
+                    STR_PAD_LEFT
+                );
+            }
+        
             $serviceCase->accepted_at = now();
         }
         if ($request->status === 'service_done') {

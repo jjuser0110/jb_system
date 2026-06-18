@@ -29,6 +29,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>ID</th>
+                        <th>Order No.</th>
                         <th>Company Name</th>
                         <th>Staff</th>
                         <th>Description</th>
@@ -48,6 +49,14 @@
 
                     <tr>
                         <td>#{{ $case->id }}</td>
+                        {{-- ORDER NUMBER --}}
+                        <td>
+                            @if($case->status !== 'pending')
+                                {{ $case->order_number ?? '-' }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>#{{ $case->company->company_name ?? '-' }}</td>
 
                         {{-- STAFF --}}

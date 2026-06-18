@@ -16,6 +16,7 @@ class ServiceCase extends Model implements HasMedia
         'submit_datetime',
         'description',
         'status',
+        'order_number',
         'completed_at',
         'is_paid',
         'receipt',

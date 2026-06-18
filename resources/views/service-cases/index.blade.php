@@ -246,6 +246,7 @@
                         <th>Staff</th>
                         <th>Description</th>
                         <th>Status</th>
+                        <th>Order No.</th>
                         <th>Submitted</th>
                         <th>Completed</th>
                         <th>Price</th>
@@ -362,7 +363,9 @@
                                 @endif
 
                             </td>
-
+                            <td>
+                                {{ $row->order_number ?? '-' }}
+                            </td>
                             
 
                             {{-- SUBMIT DATETIME --}}
