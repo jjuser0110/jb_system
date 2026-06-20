@@ -443,13 +443,22 @@
                                     </a>
 
                                     {{-- DELETE --}}
-                                    <a style="color:red;cursor:pointer"
-                                        title="Delete"
-                                        onclick="if(confirm('Are you sure you want to delete?')){showLoading();window.location.href='{{ route('service-cases.destroy',$row) }}'}">
+                                    <form action="{{ route('service-cases.destroy', $row) }}"
+                                        method="POST"
+                                        style="display:inline-block;"
+                                        onsubmit="return confirm('Are you sure you want to delete?')">
 
-                                        <i class="fa-solid fa-trash"></i>
+                                        @csrf
+                                        @method('DELETE')
 
-                                    </a>
+                                        <button type="submit"
+                                                class="btn p-0 border-0 bg-transparent text-danger"
+                                                title="Delete"
+                                                onclick="showLoading()">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+
+                                    </form>
 
                                 @else
 
