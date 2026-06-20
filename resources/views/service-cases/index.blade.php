@@ -141,7 +141,7 @@
                     </div>
 
                 </div>
-                @if(!$user->isAn('owner') && !$user->isAn('staff'))
+                @if(!$user->isAn('owner') && !$user->isAn('company_staff'))
                 {{-- STATUS BUTTONS --}}
                 <div class="mt-4 d-flex flex-wrap gap-2">
 
