@@ -68,15 +68,24 @@ if ($user->isAn('superadmin') || $user->isAn('admin')) {
         @if($canAccessCaseModule)
 
         <li class="menu-item {{ Str::contains($currentRoute, 'service-cases') || Str::contains($currentRoute, 'service.') ? 'active open' : '' }}">
-
-                @can('manage-case')
-                <li class="menu-item {{ Str::contains($currentRoute, 'service-cases.') ? 'active' : '' }}">
-                    <a href="{{ route('service-cases.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-task"></i><div>Case Listing</div>
-                    </a>
-                </li>
-                @endcan
-                
+                @if(!$user->isAn('owner') && !$user->isAn('company-staff'))
+                    @can('manage-case')
+                    <li class="menu-item {{ Str::contains($currentRoute, 'service-cases.') ? 'active' : '' }}">
+                        <a href="{{ route('service-cases.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-task"></i><div>Case Listing</div>
+                        </a>
+                    </li>
+                    @endcan
+                @endif
+                @if(!$user->isAn('admin') && !$user->isAn('superadmin'))
+                    @can('staff-manage-case')
+                    <li class="menu-item {{ Str::contains($currentRoute, 'service-cases.') ? 'active' : '' }}">
+                        <a href="{{ route('service-cases.create') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-task"></i> <div>New Case</div>
+                        </a>
+                    </li>
+                    @endcan
+                @endif
         </li>
         @endif
         @if($canAccessAdminCaseModule)
