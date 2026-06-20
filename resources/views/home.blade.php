@@ -352,7 +352,72 @@
             </h5>
 
         </div>
+        <div class="card-body border-bottom">
 
+            <form method="GET">
+
+                <div class="row g-3">
+
+                    @if(auth()->user()->isAn('owner') && isset($ownerCompanies))
+                        <input type="hidden"
+                            name="company_id"
+                            value="{{ request('company_id') }}">
+                    @endif
+
+                    <div class="col-md-5">
+                        <input type="text"
+                            name="search"
+                            class="form-control"
+                            placeholder="Search service or company..."
+                            value="{{ request('search') }}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+
+                            <option value="">All Statuses</option>
+
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+                                Pending
+                            </option>
+
+                            <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>
+                                In Progress
+                            </option>
+
+                            <option value="service_done" {{ request('status') == 'service_done' ? 'selected' : '' }}>
+                                Work Done
+                            </option>
+
+                            <option value="complete" {{ request('status') == 'complete' ? 'selected' : '' }}>
+                                Completed
+                            </option>
+
+                            <option value="cancel" {{ request('status') == 'cancel' ? 'selected' : '' }}>
+                                Cancelled
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 d-flex gap-2">
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bx bx-search"></i> Filter
+                        </button>
+
+                        <a href="{{ route('home', request()->filled('company_id') ? ['company_id' => request('company_id')] : []) }}"
+                        class="btn btn-outline-secondary">
+                            Reset
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+            </div>
         <div class="table-responsive">
 
             <table class="table table-hover">
@@ -452,7 +517,7 @@
 
                         <tr>
 
-                            <td colspan="6" class="text-center">
+                            <td colspan="8" class="text-center">
                                 No service cases found.
                             </td>
 
@@ -466,9 +531,15 @@
 
         </div>
 
-    </div>
+            @if($recentCases->hasPages())
+            <div class="card-footer d-flex justify-content-center">
+                {{ $recentCases->links() }}
+            </div>
+            @endif
 
-</div>
+    </div> {{-- End card --}}
+
+</div> {{-- End container --}}
 
 @endsection
 

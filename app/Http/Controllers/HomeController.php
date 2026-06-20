@@ -41,7 +41,9 @@ class HomeController extends Controller
     
         $ownerCompanies = collect();
         $selectedCompanyId = request('company_id');
-    
+        $search = request('search');
+        $status = request('status');
+
         // Restrict data for non-admin users
         if (
             !$user->isAn('admin') &&
@@ -101,6 +103,20 @@ class HomeController extends Controller
     
             }
         }
+        // Search filter
+        if (!empty($search)) {
+            $serviceCaseQuery->where(function ($query) use ($search) {
+                $query->where('description', 'like', "%{$search}%")
+                    ->orWhereHas('company', function ($q) use ($search) {
+                        $q->where('company_name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Status filter
+        if (!empty($status)) {
+            $serviceCaseQuery->where('status', $status);
+        }
     
         // Dashboard Statistics
     
@@ -141,8 +157,8 @@ class HomeController extends Controller
                 'companyStaff'
             ])
             ->latest()
-            ->take(10)
-            ->get();
+            ->paginate(5)
+            ->withQueryString();
     
         return view('home', compact(
             'totalCases',
