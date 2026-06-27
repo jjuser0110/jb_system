@@ -8,6 +8,8 @@ $canAccessCompanyModule = $user?->can('manage-company');
 
 $canAccessCaseModule = $user?->can('manage-case');
 
+$canAccessStaffCaseModule = $user?->can('staff-manage-case');
+
 $canAccessAdminCaseModule = $user?->can('admin-manage-case');
 
 $canManageUsers =
@@ -102,7 +104,7 @@ if ($user->isAn('superadmin') || $user->isAn('admin')) {
         </li>
         @endif
 
-        @if($canAccessCaseModule)
+        @if($canAccessStaffCaseModule)
         @if(!$user->isAn('admin') && !$user->isAn('superadmin'))
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Cases Status</span>
