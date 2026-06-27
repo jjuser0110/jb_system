@@ -69,7 +69,6 @@ class CompanyStaffController extends Controller
             'company_id' => 'required|exists:companies,id',
             'username'   => 'required|unique:users,username',
             'name'       => 'required',
-            'email'      => 'required|email|unique:users,email',
             'password'   => 'required|min:6',
         ]);
 
@@ -105,7 +104,6 @@ class CompanyStaffController extends Controller
             'company_id' => $request->company_id,
             'username'   => $request->username,
             'name'       => $request->name,
-            'email'      => $request->email,
             'password'   => Hash::make($request->password),
         ]);
 
@@ -159,7 +157,6 @@ class CompanyStaffController extends Controller
             'company_id' => 'required|exists:companies,id',
             'username'   => 'required|unique:users,username,' . $user->id,
             'name'       => 'required',
-            'email'      => 'required|email|unique:users,email,' . $user->id,
         ]);
 
         if ($validator->fails()) {
@@ -183,7 +180,6 @@ class CompanyStaffController extends Controller
             'company_id' => $request->company_id,
             'username'   => $request->username,
             'name'       => $request->name,
-            'email'      => $request->email,
         ]);
 
         return redirect()

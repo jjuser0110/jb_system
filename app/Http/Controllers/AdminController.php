@@ -26,7 +26,6 @@ class AdminController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'username' => 'required|unique:users,username',
-            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
         ]);
 
@@ -39,7 +38,6 @@ class AdminController extends Controller
         $admin = User::create([
             'name' => $request->name,
             'username' => $request->username,
-            'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
@@ -60,7 +58,6 @@ class AdminController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'username' => 'required|unique:users,username,' . $admin->id,
-            'email' => 'required|email|unique:users,email,' . $admin->id,
         ]);
 
         if ($validator->fails()) {
@@ -72,7 +69,6 @@ class AdminController extends Controller
         $data = [
             'name' => $request->name,
             'username' => $request->username,
-            'email' => $request->email,
         ];
 
         if ($request->password != null) {

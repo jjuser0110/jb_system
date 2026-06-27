@@ -47,17 +47,7 @@
                     @if(isset($admin)) readonly @endif
                     />
                 </div>
-                <div class="col-md-7">
-                    <label class="form-label" for="admin_email">Email</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        placeholder="Email"
-                        name="email"
-                        value="{{ $admin->email ?? '' }}"
-                        required
-                    />
-                </div>
+
                 <div class="col-md-7">
                     <label class="form-label" for="password">Password</label>
                     <input

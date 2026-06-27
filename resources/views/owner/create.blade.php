@@ -54,16 +54,6 @@
                                    @if(isset($owner)) readonly @endif />
                         </div>
 
-                        {{-- EMAIL --}}
-                        <div class="col-md-7">
-                            <label class="form-label">Email</label>
-                            <input type="text"
-                                   class="form-control"
-                                   placeholder="Email"
-                                   name="email"
-                                   value="{{ $owner->email ?? '' }}"
-                                   required />
-                        </div>
                         <div class="mb-3">
                             <label>Companies</label>
 

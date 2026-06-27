@@ -39,7 +39,6 @@ class OwnerController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'username' => 'required|unique:users,username',
-            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'company_ids' => 'nullable|array',
             'company_ids.*' => 'exists:companies,id',
@@ -84,7 +83,6 @@ class OwnerController extends Controller
         $owner = User::create([
             'name' => $request->name,
             'username' => $request->username,
-            'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
         
@@ -140,7 +138,6 @@ class OwnerController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'username' => 'required|unique:users,username,' . $owner->id,
-            'email' => 'required|email|unique:users,email,' . $owner->id,
             'company_ids' => 'nullable|array',
             'company_ids.*' => 'exists:companies,id',
         ]);
@@ -154,7 +151,6 @@ class OwnerController extends Controller
         $data = [
             'name' => $request->name,
             'username' => $request->username,
-            'email' => $request->email,
         ];
     
         if ($request->password) {

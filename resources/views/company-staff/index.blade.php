@@ -43,7 +43,6 @@
                         <tr>
                             <th>Username</th>
                             <th>Name</th>
-                            <th>Email</th>
                             <th>Company</th>
                             <th>Actions</th>
                         </tr>
@@ -58,8 +57,6 @@
                             <td>{{ $staff->username ?? '-' }}</td>
 
                             <td>{{ $staff->name ?? '-' }}</td>
-
-                            <td>{{ $staff->email ?? '-' }}</td>
 
                             <td>
                                 {{ $staff->company->company_name ?? '-' }}

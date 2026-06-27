@@ -88,18 +88,6 @@
 
                     </div>
 
-                    {{-- EMAIL --}}
-                    <div class="col-md-6 mb-3">
-
-                        <label class="form-label">Email</label>
-
-                        <input type="email"
-                            name="email"
-                            class="form-control"
-                            value="{{ old('email', $companyStaff->email ?? '') }}">
-
-                    </div>
-
                     {{-- PASSWORD --}}
                     @if(!isset($companyStaff))
                     <div class="col-md-6 mb-3">
